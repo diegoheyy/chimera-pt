@@ -26,6 +26,16 @@ export interface ReadoutLayout {
   slotY: number;
 }
 
+/**
+ * A slot value's size, shrunk so it fits its column: Portuguese words ("Arredondados") are longer
+ * than the English ones the sizes were set for, and ran into the next slot. Never under LABEL_MIN.
+ */
+function fit(text: string, size: number, maxW: number, ls: number): number {
+  // Hershey capitals average about 0.62 em wide, plus the letter spacing
+  const em = text.length * (0.62 + ls);
+  return Math.max(LABEL_MIN, Math.min(size, maxW / Math.max(em, 1)));
+}
+
 export function drawReadouts(ctx: CanvasRenderingContext2D, layout: ReadoutLayout, formants: number[], info: string[], slots: Slot[]): void {
   if (layout.compact) return drawReadoutsCompact(ctx, layout, formants, info, slots);
   const { w, h } = layout;
@@ -54,7 +64,7 @@ export function drawReadouts(ctx: CanvasRenderingContext2D, layout: ReadoutLayou
     label(ctx, s.label.toUpperCase(), cx + 16, cy + 8, { size: 11, color: s.color, ls: 0.2 });
     const by = cy + 18 + big * 1.1;
     if (s.ipa) ipaGlyph(ctx, cx + big * 0.6, by, s.value, big * 1.45, s.color);
-    else label(ctx, s.value.toUpperCase(), cx, by, { size: s.value.length > 3 ? big * 0.82 : big, color: s.color, weight: "m", ls: 0.04 });
+    else label(ctx, s.value.toUpperCase(), cx, by, { size: fit(s.value, s.value.length > 3 ? big * 0.82 : big, cellW - 8, 0.04), color: s.color, weight: "m", ls: 0.04 });
     if (s.unit) label(ctx, s.unit.toUpperCase(), s.ipa ? cx + big * 1.5 : cx + (s.value.length > 3 ? 0 : big * 1.64), s.ipa || s.value.length <= 3 ? by : by + 18, { size: 11, color: s.color, ls: 0.16 });
   });
 }
@@ -81,7 +91,7 @@ function drawReadoutsCompact(ctx: CanvasRenderingContext2D, layout: ReadoutLayou
     label(ctx, s.label.toUpperCase(), cx + 12, y0 + 3, { size: LABEL_MIN, color: s.color, ls: 0.14 });
     const by = y0 + 18 + big;
     if (s.ipa) ipaGlyph(ctx, cx + big * 0.5, by, s.value, big * 1.4, s.color);
-    else label(ctx, s.value.toUpperCase(), cx, by, { size: s.value.length > 3 ? big * 0.62 : big, color: s.color, weight: "m", ls: 0.02 });
+    else label(ctx, s.value.toUpperCase(), cx, by, { size: fit(s.value, s.value.length > 3 ? big * 0.62 : big, cw - 6, 0.02), color: s.color, weight: "m", ls: 0.02 });
     if (s.unit) label(ctx, s.unit.toUpperCase(), cx, by + 16, { size: LABEL_MIN, color: s.color, ls: 0.14 });
   });
 }

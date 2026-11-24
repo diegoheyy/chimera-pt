@@ -2950,7 +2950,10 @@ html.in-browser .resize-grip {
   .right-lab {
     grid-template-rows: none;
   }
-  .right-lab .screen-body {
+  /* as specific as the 96px floor above, or it wins and the score's tracks overlap on a phone */
+  .right-lab .s-score .screen-body,
+  .right-lab .s-spec .screen-body,
+  .right-lab .s-folds .screen-body {
     min-height: 200px;
   }
   .right-lab .s-lab .screen-body {
@@ -2962,5 +2965,13 @@ html.in-browser .resize-grip {
   .right-lab {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "act" "lab" "score" "spec" "folds";
+  }
+}
+
+/* a phone: the head shorter, so the tab's first control (Falar, Cantar, Respirar) shows without
+   scrolling under the header and the head's toggles */
+@media (max-width: 640px) {
+  .left .screen-body {
+    min-height: max(300px, 44vh);
   }
 }

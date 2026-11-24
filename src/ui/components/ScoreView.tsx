@@ -53,7 +53,7 @@ export function ScoreView() {
     for (let i = 1; i <= ROWS.length + 1; i++) seg(ctx, left, top + rowH * i, right, top + rowH * i, V.frame, 1);
     if (!sp) {
       // on black over the rules, wrapped to the score's width
-      const msg = "SPEAK SOMETHING TO SEE ITS GESTURES: WHICH ARTICULATOR MOVES, WHEN, AND HOW THEY OVERLAP.";
+      const msg = "FALE ALGO PARA VER OS GESTOS: QUAL ARTICULADOR SE MOVE, QUANDO E COMO ELES SE SOBREPÕEM.";
       const cy = (top + bottom) / 2;
       const bh = wrapLabel(ctx, msg, right - left - 16, { size: LABEL_MIN, ls: 0.12 }).length * blockLineH(10) + 8;
       ctx.fillStyle = "#000";

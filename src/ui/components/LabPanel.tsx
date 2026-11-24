@@ -145,8 +145,10 @@ export function LabRight() {
             <Chip toggle={false} onClick={() => exportSheet(sheet, dialect)}>
               Exportar
             </Chip>
-            <span className="dim">{DIALECTS.find((d) => d.value === dialect)?.about}</span>
           </div>
+          <p className="dim">
+            Sotaque {DIALECTS.find((d) => d.value === dialect)?.label.toLowerCase()}: {DIALECTS.find((d) => d.value === dialect)?.about}
+          </p>
         </div>
       </Screen>
       <Screen watch className="s-score" title="Partitura gestual">
