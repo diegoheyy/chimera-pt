@@ -8,6 +8,7 @@ import { tokenizeIpa, type Lang } from "../../wasm/engine.ts";
 import { Menu, Slider } from "./Controls.tsx";
 import { Chip, Screen } from "./Screen.tsx";
 import { LangPick } from "./LangPick.tsx";
+import { DIALECTS, useAccent } from "../accent.ts";
 import { ActionBar, PrimaryButton } from "./ActionBar.tsx";
 import { ScoreView, planNow } from "./ScoreView.tsx";
 import { TubeView } from "./TubeView.tsx";
@@ -20,21 +21,22 @@ import { inPlugin } from "../../audio/pluginBridge.ts";
 const EXAMPLES: Record<Lang, string[]> = {
   en: ["Hello. Can you hear me?", "She sells sea shells by the sea shore.", "Every sound here is air moving through a throat.", "The quick brown fox jumps over the lazy dog."],
   tr: ["Merhaba, nasılsın?", "Bugün hava çok güzel.", "Türkçe konuşabiliyor musun?", "Şu köşe yaz köşesi, şu köşe kış köşesi."],
+  pt: ["Oi, tudo bem?", "O rato roeu a roupa do rei de Roma.", "Lá em casa tem pão de queijo.", "A aranha arranha a rã."],
 };
 
 // IPA pulmonic consonant chart (rows = manner, columns = place); empty cells are null
-const PLACES = ["Bilabial", "Labiodental", "Dental", "Alveolar", "Postalveolar", "Retroflex", "Palatal", "Velar", "Uvular", "Pharyngeal", "Glottal"];
+const PLACES = ["Bilabial", "Labiodental", "Dental", "Alveolar", "Pós-alveolar", "Retroflexa", "Palatal", "Velar", "Uvular", "Faríngea", "Glotal"];
 /** short headings for the chart's narrow columns (the full names are the cells' titles) */
-const PLACE_SHORT = ["Bilab", "Labdent", "Dental", "Alveol", "Postalv", "Retrofl", "Palatal", "Velar", "Uvular", "Pharyn", "Glottal"];
-const MANNER_SHORT: Record<string, string> = { "Lateral fricative": "Lat fric", Approximant: "Approx" };
+const PLACE_SHORT = ["Bilab", "Labdent", "Dental", "Alveol", "Pós-alv", "Retrofl", "Palatal", "Velar", "Uvular", "Faríng", "Glotal"];
+const MANNER_SHORT: Record<string, string> = { "Fricativa lateral": "Fric lat", Aproximante: "Aprox" };
 const CHART: [string, (string | null)[][]][] = [
-  ["Plosive", [["p", "b"], [null, null], [null, null], ["t", "d"], [null, null], ["ʈ", "ɖ"], ["c", "ɟ"], ["k", "g"], ["q", "ɢ"], [null, null], ["ʔ", null]]],
+  ["Oclusiva", [["p", "b"], [null, null], [null, null], ["t", "d"], [null, null], ["ʈ", "ɖ"], ["c", "ɟ"], ["k", "g"], ["q", "ɢ"], [null, null], ["ʔ", null]]],
   ["Nasal", [[null, "m"], [null, "ɱ"], [null, null], [null, "n"], [null, null], [null, "ɳ"], [null, "ɲ"], [null, "ŋ"], [null, "ɴ"], [null, null], [null, null]]],
-  ["Trill", [[null, "ʙ"], [null, null], [null, null], [null, "r"], [null, null], [null, null], [null, null], [null, null], [null, "ʀ"], [null, null], [null, null]]],
-  ["Tap", [[null, null], [null, null], [null, null], [null, "ɾ"], [null, null], [null, "ɽ"], [null, null], [null, null], [null, null], [null, null], [null, null]]],
-  ["Fricative", [["ɸ", "β"], ["f", "v"], ["θ", "ð"], ["s", "z"], ["ʃ", "ʒ"], ["ʂ", "ʐ"], ["ç", "ʝ"], ["x", "ɣ"], ["χ", "ʁ"], ["ħ", "ʕ"], ["h", "ɦ"]]],
-  ["Lateral fricative", [[null, null], [null, null], [null, null], ["ɬ", "ɮ"], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]],
-  ["Approximant", [[null, null], [null, "ʋ"], [null, null], [null, "ɹ"], [null, null], [null, "ɻ"], [null, "j"], [null, "ɰ"], [null, null], [null, null], [null, null]]],
+  ["Vibrante", [[null, "ʙ"], [null, null], [null, null], [null, "r"], [null, null], [null, null], [null, null], [null, null], [null, "ʀ"], [null, null], [null, null]]],
+  ["Tepe", [[null, null], [null, null], [null, null], [null, "ɾ"], [null, null], [null, "ɽ"], [null, null], [null, null], [null, null], [null, null], [null, null]]],
+  ["Fricativa", [["ɸ", "β"], ["f", "v"], ["θ", "ð"], ["s", "z"], ["ʃ", "ʒ"], ["ʂ", "ʐ"], ["ç", "ʝ"], ["x", "ɣ"], ["χ", "ʁ"], ["ħ", "ʕ"], ["h", "ɦ"]]],
+  ["Fricativa lateral", [[null, null], [null, null], [null, null], ["ɬ", "ɮ"], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null]]],
+  ["Aproximante", [[null, null], [null, "ʋ"], [null, null], [null, "ɹ"], [null, null], [null, "ɻ"], [null, "j"], [null, "ɰ"], [null, null], [null, null], [null, null]]],
   ["Lateral", [[null, null], [null, null], [null, null], [null, "l"], [null, null], [null, "ɭ"], [null, "ʎ"], [null, null], [null, null], [null, null], [null, null]]],
 ];
 
@@ -52,12 +54,12 @@ export const speechWords = mouthWords(spokenWordNow, V.white);
 
 export const speechSlots: SlotsFn = (_m, a, f) => {
   const sound = soundingSegment();
-  const lips = a.lipAp < 0.05 ? "Closed" : a.lipWidth < 0.55 ? "Round" : a.lipAp > 1.3 ? "Open" : "Spread";
+  const lips = a.lipAp < 0.05 ? "Fechados" : a.lipWidth < 0.55 ? "Arredondados" : a.lipAp > 1.3 ? "Abertos" : "Estirados";
   return [
-    sound ? { label: "Sound", value: sound, color: V.green, ipa: true } : { label: "Sound", value: "-", color: V.green },
-    { label: "Jaw", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
-    { label: "Lips", value: lips, color: V.pink },
-    { label: "Soft palate", value: f.velumPort > 0.02 ? "Open" : "Shut", color: V.white },
+    sound ? { label: "Som", value: sound, color: V.green, ipa: true } : { label: "Som", value: "-", color: V.green },
+    { label: "Mandíbula", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
+    { label: "Lábios", value: lips, color: V.pink },
+    { label: "Véu palatino", value: f.velumPort > 0.02 ? "Aberto" : "Fechado", color: V.white },
   ];
 };
 
@@ -65,12 +67,12 @@ export const speechSlots: SlotsFn = (_m, a, f) => {
 export const speechInfo: InfoFn = (m, _f, tele) => {
   if (!tele) return [];
   const t = tele.t;
-  const out = [t.voicing > 0.3 ? `Voiced ${t.f0.toFixed(0)} Hz` : "Voiceless"];
+  const out = [t.voicing > 0.3 ? `Sonoro ${t.f0.toFixed(0)} Hz` : "Surdo"];
   if (t.noiseLevel > 1 && t.noiseNode >= 0) {
     const s = m.branchS(t.noiseNode, t.phLen, t.orLen);
-    if (s >= 0) out.push(`Noise at ${s.toFixed(1)} cm`);
+    if (s >= 0) out.push(`Ruído a ${s.toFixed(1)} cm`);
   }
-  out.push(`Lungs ${t.pLung.toFixed(1)} cmH₂O`);
+  out.push(`Pulmões ${t.pLung.toFixed(1)} cmH₂O`);
   return out;
 };
 
@@ -121,7 +123,7 @@ function ConsonantChart(props: { onPad: (c: string) => void }) {
 }
 
 /** Whether speech is sounding, polled each frame (re-renders only when it changes). */
-function useSpeaking(): boolean {
+export function useSpeaking(): boolean {
   const [on, setOn] = useState(false);
   useEffect(() => {
     let raf = 0;
@@ -142,15 +144,15 @@ function Lines() {
   const cursor = useSpeech((s) => s.cursor);
   const setCursor = useSpeech((s) => s.setCursor);
   return (
-    <div className="syllables say-lines" role="group" aria-label="Lines. Each note says the marked one; choose another to start there.">
+    <div className="syllables say-lines" role="group" aria-label="Linhas. Cada nota diz a marcada; escolha outra para começar dela.">
       {lines.map((l, i) => (
         <button key={i} className={`syl say-line${i === cursor ? " next" : ""}`} onClick={() => setCursor(i)} aria-current={i === cursor ? "step" : undefined} title={`Say from “${l}”`}>
           {l}
         </button>
       ))}
-      {!lines.length && <span className="dim">No words: the notes say nothing.</span>}
+      {!lines.length && <span className="dim">Sem palavras: as notas não dizem nada.</span>}
       <Chip toggle={false} className="from-start" onClick={() => setCursor(0)} disabled={cursor === 0}>
-        From the start
+        Do início
       </Chip>
     </div>
   );
@@ -163,6 +165,7 @@ export function SpeakRight() {
   // one language for Speak and Sing, kept with Sing's words
   const lang = useSing((s) => s.lang);
   const setLang = useSing((s) => s.setLang);
+  const { dialect, setDialect } = useAccent();
   // kept in a store, so the plugin saves them with the project and reads them on the audio thread
   const { text, ipa, rate, edit } = useSpeech();
   const setText = (v: string) => edit({ text: v });
@@ -190,7 +193,7 @@ export function SpeakRight() {
       await start();
       // the audio didn't start (the error shows on the bar): speaking would only light Stop
       if (!useStore.getState().started) return;
-      await speakText(text, { ipa, lang, body, rate, f0 });
+      await speakText(text, { ipa, lang, dialect, body, rate, f0 });
     } finally {
       setBusy(false);
     }
@@ -213,27 +216,30 @@ export function SpeakRight() {
 
   return (
     <div className="right right-speak">
-      <ActionBar label="Speak" onSpace={press}>
-        <PrimaryButton label="Speak" playing={speaking} busy={busy ? "Preparing…" : null} onClick={press} />
+      <ActionBar label="Falar" onSpace={press}>
+        <PrimaryButton label="Falar" playing={speaking} busy={busy ? "Preparando…" : null} onClick={press} />
         {/* puts an example in the box: the menu always reads Examples, since the box shows the words */}
         {!inPlugin && (
         <Menu
-          label="Examples"
+          label="Exemplos"
           value=""
-          options={[{ value: "", label: "Examples", disabled: true }, ...EXAMPLES[lang].map((ex) => ({ value: ex, label: ex }))]}
+          options={[{ value: "", label: "Exemplos", disabled: true }, ...EXAMPLES[lang].map((ex) => ({ value: ex, label: ex }))]}
           onChange={(ex) => edit({ text: ex, ipa: false })}
         />
         )}
         <div className="act-slider">
-          <Slider label="Rate" value={rate} min={0.5} max={1.8} onChange={setRate} format={(v) => `${v.toFixed(2)}×`} />
+          <Slider label="Velocidade" value={rate} min={0.5} max={1.8} onChange={setRate} format={(v) => `${v.toFixed(2)}×`} />
         </div>
         {/* the plugin reads Latin script as English (other scripts by their own front ends) */}
         {!inPlugin && <LangPick value={lang} onChange={pickLang} off={ipa} />}
+        {!inPlugin && lang === "pt" && !ipa && (
+          <Menu label="Sotaque" value={dialect} options={DIALECTS.map((d) => ({ value: d.value, label: d.label }))} onChange={setDialect} />
+        )}
         <Chip on={ipa} onClick={() => setIpa(!ipa)}>
-          Text is IPA
+          Texto em IPA
         </Chip>
       </ActionBar>
-      <Screen className="s-say" label="What to say">
+      <Screen className="s-say" label="O que dizer">
         <div className={`say${inPlugin ? " say-lined" : ""}`}>
           <div className="say-row">
             <textarea
@@ -245,9 +251,9 @@ export function SpeakRight() {
               }}
               rows={2}
               spellCheck={!ipa}
-              lang={ipa ? undefined : lang}
-              aria-label={ipa ? "IPA to speak" : "Text to speak"}
-              placeholder={ipa ? "Type IPA, for example ˈhɛloʊ" : inPlugin ? "One line per note" : "Type something for the voice to say"}
+              lang={ipa ? undefined : lang === "pt" ? "pt-BR" : lang}
+              aria-label={ipa ? "IPA para falar" : "Texto para falar"}
+              placeholder={ipa ? "Digite IPA, por exemplo ˈka.zɐ" : inPlugin ? "Uma linha por nota" : "Digite algo para a voz dizer"}
             />
           </div>
           <div className="say-row">
@@ -267,15 +273,15 @@ export function SpeakRight() {
           {inPlugin && <Lines />}
         </div>
       </Screen>
-      <Screen watch className="s-score" title="Gestural score">
+      <Screen watch className="s-score" title="Partitura gestual">
         <ScoreView />
       </Screen>
       <Screen
         className="s-chart"
-        title="Consonants"
-        sub="Between two vowels"
+        title="Consoantes"
+        sub="Entre duas vogais"
         tools={
-          <div className="vowel-pick" role="group" aria-label="Vowel around it">
+          <div className="vowel-pick" role="group" aria-label="Vogal ao redor">
             {["ɑ", "i", "u", "ə"].map((v) => (
               <Chip key={v} on={vowel === v} onClick={() => setVowel(v)} className="ipa-chip">
                 {v}
@@ -286,10 +292,10 @@ export function SpeakRight() {
       >
         <ConsonantChart onPad={(c) => void pad(c)} />
       </Screen>
-      <Screen watch className="s-tube" title="Tube" sub="Glottis to lips">
+      <Screen watch className="s-tube" title="Tubo" sub="Da glote aos lábios">
         <TubeView />
       </Screen>
-      <Screen watch className="s-folds" title="Vocal folds" sub="Slowed 100×">
+      <Screen watch className="s-folds" title="Pregas vocais" sub="100× mais lento">
         <Stroboscope />
       </Screen>
     </div>

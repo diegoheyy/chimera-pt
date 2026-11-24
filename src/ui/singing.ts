@@ -33,7 +33,7 @@ export const roll: { notes: RollNote[] } = { notes: [] };
 
 export const DEFAULT_LYRICS = "Hello there, I am a voice made of air.";
 /** the opening words in each language (choosing the other language swaps one for the other) */
-const DEFAULT_LYRICS_OF: Record<Lang, string> = { en: DEFAULT_LYRICS, tr: "Merhaba, ben havadan yapılmış bir sesim." };
+const DEFAULT_LYRICS_OF: Record<Lang, string> = { en: DEFAULT_LYRICS, tr: "Merhaba, ben havadan yapılmış bir sesim.", pt: "Olá, eu sou uma voz feita de ar." };
 
 /** sung when the lyrics are empty */
 const AH: Syllable = { text: "ah", onset: [], nucleus: { ipa: "ɑ", stress: 1 }, coda: [], wordEnd: true, phraseEnd: false };
@@ -74,14 +74,14 @@ const KEPT = "chimera-sing";
  * defaults). Not in the plugin: the project keeps its words, and every instance shares this storage.
  */
 function kept(): { lyrics: string; lang: Lang; tune: string; tempo: number; key: number } {
-  const d = { lyrics: DEFAULT_LYRICS, lang: "en" as Lang, tune: TUNES[0].id, tempo: 1, key: 0 };
-  if (inPlugin) return d;
+  const d = { lyrics: DEFAULT_LYRICS_OF.pt, lang: "pt" as Lang, tune: TUNES[0].id, tempo: 1, key: 0 };
+  if (inPlugin) return { ...d, lyrics: DEFAULT_LYRICS, lang: "en" };
   try {
     const k = JSON.parse(localStorage.getItem(KEPT) ?? "null") as Record<string, unknown> | null;
     if (!k) return d;
     return {
       lyrics: typeof k.lyrics === "string" ? k.lyrics : d.lyrics,
-      lang: k.lang === "tr" ? "tr" : d.lang,
+      lang: k.lang === "tr" || k.lang === "pt" ? k.lang : d.lang,
       tune: TUNES.some((t) => t.id === k.tune) ? (k.tune as string) : d.tune,
       tempo: typeof k.tempo === "number" && k.tempo >= 0.5 && k.tempo <= 1.5 ? k.tempo : d.tempo,
       key: typeof k.key === "number" && Math.abs(k.key) <= 12 ? Math.round(k.key) : d.key,
@@ -135,15 +135,17 @@ export const useSing = create<SingState>((set, get) => ({
     if (inPlugin) setParam("vibrato", cents);
   },
   setTune: (id) => {
-    const words = TUNES.find((t) => t.id === id)?.lyrics;
+    const chosen = TUNES.find((t) => t.id === id);
+    const words = chosen?.lyrics;
+    const wordsLang = chosen?.lang ?? "en";
     const { lyrics, lang } = get();
     const asWritten = TUNES.some((t) => t.lyrics === lyrics);
     if (words !== undefined) {
-      // a demo song brings its words, in English or a script of its own; the player's own words
-      // and language come back with a mood
+      // a song brings its words, in its language (English, or a script of its own); the player's
+      // own words and language come back with a mood
       if (!asWritten) ownWords = { lyrics, lang };
-      if (lyrics !== words || lang !== "en") {
-        set({ lang: "en" });
+      if (lyrics !== words || lang !== wordsLang) {
+        set({ lang: wordsLang });
         get().setLyrics(words);
       }
     } else if (asWritten && ownWords !== null) {
@@ -412,7 +414,7 @@ export async function playTune(id: string, body: BodyMix, ready?: () => Promise<
   stopSinging();
   const token = demoToken;
   await ready?.();
-  // Turkish reads by rule: no English dictionary to wait for
+  // Turkish and Portuguese read by rule: no English dictionary to wait for
   if (useSing.getState().lang === "en")
     try {
       await g2p.load();
@@ -426,12 +428,12 @@ export async function playTune(id: string, body: BodyMix, ready?: () => Promise<
   const own = lyricsToSyllables(st.lyrics, st.lang);
   const words = own.length ? own : lyricsToSyllables(la(tune), st.lang);
   const shift = tune.octave[nearestBody(body)] * 12 + st.key;
-  // a demo song's own words, unedited: a syllable to each note as written (as `chimera render song`)
+  // a song's own words, unedited: a syllable to each note as written (as `chimera render song`)
   const { notes, from } =
     tune.lyrics !== undefined && st.lyrics === tune.lyrics && own.length
       ? {
-          notes: tune.phrases[0].map(([midi, beats], i) => ({ midi: midi + shift, beats, syl: own[i % own.length] })),
-          from: tune.phrases[0].map((_, i) => i % own.length),
+          notes: tune.phrases.flat().map(([midi, beats], i) => ({ midi: midi + shift, beats, syl: own[i % own.length] })),
+          from: tune.phrases.flat().map((_, i) => i % own.length),
         }
       : fitSong(tune, words, shift);
   if (!notes.length) return false;

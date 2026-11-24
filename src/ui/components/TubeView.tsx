@@ -90,5 +90,5 @@ export function TubeView() {
       label(ctx, name, lx, h - 9, { size: LABEL_MIN, color: TEXT.secondary, ls: 0.16 });
     }
   });
-  return <canvas ref={ref} className="instrument-canvas" aria-label="Area function of the simulated tube, lit by sound pressure" role="img" />;
+  return <canvas ref={ref} className="instrument-canvas" aria-label="Função de área do tubo simulado, iluminada pela pressão sonora" role="img" />;
 }

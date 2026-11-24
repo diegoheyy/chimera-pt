@@ -188,7 +188,7 @@ try {
   await host("param", "gain=0");
 
   // ---- the body
-  await page.getByRole("radio", { name: "Female" }).click();
+  await page.getByRole("radio", { name: "Mulher" }).click();
   await until("a body change reaches the voice", async () => (await tele())!.body.female === 1);
   const s1 = await state();
   check("and the project", s1.settings.body.female === 1 && s1.settings.f0 === 205, s1.settings);
@@ -200,27 +200,27 @@ try {
   check("nothing from the old voice's timeline is on the roll", future.length === 0, future);
 
   // ---- Play
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   await until("Play is saved", async () => (await state()).settings.mode === "play");
   await page.waitForSelector(".right-play");
   await page.screenshot({ path: `${outDir}/play.png` });
   // Play's main button: Breathe, then Stop while it breathes
-  await page.getByRole("button", { name: "Breathe" }).click();
+  await page.getByRole("button", { name: "Respirar" }).click();
   await until("Breathe breathes", async () => (await tele())!.gate > 0.5);
-  await page.getByRole("button", { name: "Stop" }).click();
+  await page.getByRole("button", { name: "Parar" }).click();
   await until("and stops", async () => (await tele())!.gate < 0.1);
   await host("note", 69);
   await until("a host key breathes at its pitch", async () => Math.abs((await tele())!.f0 - 440) < 8);
   await until("the readout follows it", async () => /440 Hz/.test((await page.locator(".s-keys").textContent()) ?? ""));
   await host("off", 69);
-  await page.getByRole("button", { name: "Whisper" }).click();
+  await page.getByRole("button", { name: "Sussurro" }).click();
   await until("a saved setting reaches the project", async () => (await state()).settings.voiced === false);
-  await page.getByRole("button", { name: "Whisper" }).click();
+  await page.getByRole("button", { name: "Sussurro" }).click();
   // the 3D face is a chunk of its own, over the same protocol
   await page.getByRole("checkbox", { name: "3D" }).click().catch(() => page.getByText("3D", { exact: true }).click());
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${outDir}/play-3d.png` });
-  await page.getByRole("radio", { name: "Sing" }).click();
+  await page.getByRole("radio", { name: "Cantar" }).click();
   await until("back to Sing", async () => (await state()).settings.mode === "sing");
 
   // ---- a project restored while the window is open
@@ -232,7 +232,7 @@ try {
   check("a command from before the restore is dropped", (await state()).settings.lyrics === "la la land");
   check("and the mode", (await state()).settings.mode === "play");
   await until("and the voice", async () => (await tele())?.body.child === 1);
-  await page.getByRole("radio", { name: "Sing" }).click();
+  await page.getByRole("radio", { name: "Cantar" }).click();
   await until("the restored lyrics show", async () => (await page.locator(".lyrics textarea").inputValue()) === "la la land");
   await until("as syllables", async () => (await page.locator(".syl").count()) === 3);
 
@@ -289,9 +289,9 @@ try {
   await page.waitForTimeout(100);
   check("a line isn't stopped by its note's release", (await tele())!.voicing > 0.1 || (await page.evaluate(() => fetch("/speech").then((r) => r.ok))));
   // Speak's main button is Stop while a line sounds (the first line is long, so it still is)
-  await page.getByRole("button", { name: "Stop", exact: true }).click();
+  await page.getByRole("button", { name: "Parar", exact: true }).click();
   await until("Stop stops it", async () => (await tele())!.voicing < 0.1);
-  await page.getByRole("button", { name: "Speak", exact: true }).click();
+  await page.getByRole("button", { name: "Falar", exact: true }).click();
   await until("the Speak button says the next line", async () => (await nextLine()) === "Hello there, it is so good to see you again." && (await tele())!.voicing > 0.1);
   // picking a line while stopped is where playing starts
   await page.locator(".say-line").nth(1).click();
@@ -313,10 +313,10 @@ try {
   const slow = await planEnd();
   await page.getByRole("slider", { name: /rate/i }).first().press("End");
   await until("a faster rate replans the lines", async () => (await planEnd()) < slow);
-  await page.getByRole("button", { name: "Text is IPA" }).click();
+  await page.getByRole("button", { name: "Texto em IPA" }).click();
   await page.getByRole("textbox", { name: "IPA to speak" }).fill("ˈhɛloʊ");
   await until("IPA is said as written", async () => (await page.locator(".say-line").count()) === 1 && (await state()).settings.speech.ipa === true);
-  await page.getByRole("button", { name: "Text is IPA" }).click();
+  await page.getByRole("button", { name: "Texto em IPA" }).click();
   await until("back to text", async () => (await state()).settings.speech.ipa === false);
   await say.fill("Saved with the project.");
   await until("the text is in the project's state", async () => (await state()).settings.speech.text === "Saved with the project.");
@@ -336,7 +336,7 @@ try {
   });
   // Beatbox's main button, and the pattern and tempo it shows (main's action bar and Tempo screen)
   const playButton = page.locator(".right-beatbox .act-primary");
-  const pattern = () => page.getByRole("combobox", { name: "Pattern" }).evaluate((s: HTMLSelectElement) => s.selectedOptions[0]?.textContent ?? "");
+  const pattern = () => page.getByRole("combobox", { name: "Padrão" }).evaluate((s: HTMLSelectElement) => s.selectedOptions[0]?.textContent ?? "");
   // what shows (innerText: not the encoder readout's hidden sizing copies, and in the CSS's capitals)
   const tempoShown = () => page.locator(".s-transport").innerText();
   const beatChip = (name: string) => page.locator(".right-beatbox .action-bar .chip", { hasText: name });
@@ -387,7 +387,7 @@ try {
     const b = (await state()).settings.beat;
     return b.preset === null && b.steps[1]?.id === "tss";
   });
-  await page.getByRole("combobox", { name: "Pattern" }).selectOption("Four on the floor");
+  await page.getByRole("combobox", { name: "Padrão" }).selectOption("Four on the floor");
   await until("an example replaces it, with its tempo", async () => {
     const b = (await state()).settings.beat;
     return b.preset === "Four on the floor" && b.bpm === 122;

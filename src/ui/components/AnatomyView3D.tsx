@@ -269,12 +269,12 @@ export function AnatomyView3D(props: { slots?: SlotsFn; info?: InfoFn; showForma
   if (failed)
     return (
       <div className="anatomy three">
-        <p className="no-webgl">3D needs WebGL, which this browser has turned off. Untick 3D for the flat view.</p>
+        <p className="no-webgl">O 3D precisa de WebGL, que este navegador desativou. Desmarque 3D para ver a vista plana.</p>
       </div>
     );
   return (
     <div ref={wrapRef} className="anatomy three">
-      <canvas ref={canvasRef} aria-label="Vocal tract in 3D. Drag to turn the head, scroll or pinch to zoom, double-click to go back to the starting view." role="img" />
+      <canvas ref={canvasRef} aria-label="Trato vocal em 3D. Arraste para girar a cabeça, role ou faça pinça para dar zoom, clique duas vezes para voltar à vista inicial." role="img" />
     </div>
   );
 }

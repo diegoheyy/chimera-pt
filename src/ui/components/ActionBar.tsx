@@ -31,12 +31,12 @@ export function ActionBar(props: { label: string; onSpace: () => void; children:
         <div className="act-row">{props.children}</div>
         {err && (
           <p className="act-error" role="alert">
-            Audio could not start: {err}. Press again to retry.
+            O áudio não pôde iniciar: {err}. Clique de novo para tentar outra vez.
           </p>
         )}
         {overloaded && (
           <p className="act-error" role="status">
-            This device can't keep up, so the voice breaks up or goes silent. Plugging in, or closing other tabs, may help.
+            Este aparelho não está dando conta, então a voz falha ou some. Ligar na tomada ou fechar outras abas pode ajudar.
           </p>
         )}
       </div>
@@ -50,7 +50,7 @@ export function ActionBar(props: { label: string; onSpace: () => void; children:
  */
 export function PrimaryButton(props: { label: string; playing?: boolean; busy?: string | null; pressed?: boolean; icon?: "play" | "breath"; className?: string; title?: string; onClick: () => void }) {
   const starting = useStore((s) => s.starting);
-  const text = starting && props.pressed !== false ? "Starting…" : props.busy ? props.busy : props.playing ? "Stop" : props.label;
+  const text = starting && props.pressed !== false ? "Iniciando…" : props.busy ? props.busy : props.playing ? "Parar" : props.label;
   return (
     <button type="button" className={`act-primary${props.playing ? " on" : ""}${props.className ? " " + props.className : ""}`} onClick={props.onClick} disabled={starting || !!props.busy} title={props.title}>
       <span className={`act-icon ${props.playing ? "stop" : (props.icon ?? "play")}`} aria-hidden="true" />

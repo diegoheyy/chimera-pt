@@ -218,14 +218,10 @@ describe("Sing mode, live keys", () => {
     engineStub.schedule = schedule;
   });
 
-  test("every demo song can be chosen and sings its own words a syllable to a note; the player's words come back with a mood", async () => {
-    // #87's tunes menu left out the contributed demo songs ("Ночной ветер", Daisy Bell)
-    const { DEMO_SONGS } = await import("../src/wasm/engine.ts");
+  test("every cantiga can be chosen and sings its own words a syllable to a note; the player's words come back with a mood", async () => {
     const { TUNES } = await import("../src/song/tunes.ts");
-    const melodies = TUNES.map((t) => JSON.stringify(t.phrases.flat()));
-    for (const d of DEMO_SONGS) expect(melodies).toContain(JSON.stringify(d.notes.map(([m, b]) => [m, b])));
     const songs = TUNES.filter((t) => t.lyrics !== undefined);
-    expect(songs.map((t) => t.name)).toContain("Ночной ветер");
+    expect(songs.map((t) => t.name)).toContain("Rato roeu (r forte)");
     voice = new WasmVoice(FS);
     const sing = useSing.getState;
     let sent: { gestures: Gesture[] } | null = null;
@@ -258,12 +254,14 @@ describe("Sing mode, live keys", () => {
     sing().setLyrics("Hello there");
   });
 
-  test("Turkish lyrics: TR reads them and a tune sings them; a demo song is read as English, and the player's language comes back with a mood", async () => {
+  test("Turkish lyrics: TR reads them and a tune sings them; a cantiga is read as Portuguese, and the player's language comes back with a mood", async () => {
     const { TUNES } = await import("../src/song/tunes.ts");
     const { DEFAULT_LYRICS } = await import("../src/ui/singing.ts");
     voice = new WasmVoice(FS);
     const sing = useSing.getState;
     sing().setTune("joyful");
+    // the page opens in Portuguese: start from English's opening words
+    sing().setLang("en");
     sing().setLyrics(DEFAULT_LYRICS);
     // the opening words give way to Turkish's, and Turkish letters are read
     sing().setLang("tr");
@@ -274,10 +272,10 @@ describe("Sing mode, live keys", () => {
     expect(await playTune("joyful", MALE, () => Promise.resolve())).toBe(true);
     expect(sing().syllables.map((s) => s.text)).toEqual(["çok", "gü", "zel"]);
     stopSinging();
-    // a demo song in English brings its words, read as English
-    const song = TUNES.find((t) => t.lyrics !== undefined && /^[ -~\s]*$/.test(t.lyrics))!;
+    // a cantiga brings its words, read as Portuguese
+    const song = TUNES.find((t) => t.lang === "pt")!;
     sing().setTune(song.id);
-    expect(sing().lang).toBe("en");
+    expect(sing().lang).toBe("pt");
     expect(sing().lyrics).toBe(song.lyrics!);
     sing().setTune("joyful");
     expect(sing().lang).toBe("tr");

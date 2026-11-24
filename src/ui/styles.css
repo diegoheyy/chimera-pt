@@ -2906,3 +2906,61 @@ html.in-browser .resize-grip {
 .in-plugin .ipa-chart .ipa-empty {
   height: 18px;
 }
+
+/* ---------- Lab: phonetics lessons in Portuguese (src/ui/lab.ts). The lesson flows in its screen;
+   the score, spectrum and folds only show what was said, so they take what is left */
+.right-lab {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(min-content, 200fr) minmax(min-content, 180fr);
+  grid-template-areas: "act act" "lab lab" "score score" "spec folds";
+}
+
+.s-lab { grid-area: lab; }
+.right-lab .s-spec { grid-area: spec; }
+.right-lab .s-folds { grid-area: folds; }
+.right-lab .s-score .screen-body,
+.right-lab .s-spec .screen-body,
+.right-lab .s-folds .screen-body {
+  min-height: 96px;
+}
+
+.lab {
+  padding: 6px 14px 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.lab p {
+  margin: 0;
+}
+
+.lab-items,
+.lab-sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.lab-ipa .transcription {
+  font-size: 1.15em;
+}
+
+@media (max-width: 1100px) {
+  .right-lab {
+    grid-template-rows: none;
+  }
+  .right-lab .screen-body {
+    min-height: 200px;
+  }
+  .right-lab .s-lab .screen-body {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .right-lab {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "act" "lab" "score" "spec" "folds";
+  }
+}

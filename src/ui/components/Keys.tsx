@@ -90,7 +90,7 @@ export function Keys() {
   };
   return (
     <div className="keys-row">
-      <div className="keys" data-layout="layered" aria-label="Keyboard. Computer keys A to semicolon play notes; Z and X change octave.">
+      <div className="keys" data-layout="layered" aria-label="Teclado. As teclas A a ç do computador tocam notas; Z e X mudam a oitava.">
         <div className="white-row">
           {whites.map((m) => (
             <button key={m} className={`key white${held.includes(m) ? " down" : ""}`} onPointerDown={press(m)} aria-label={`Note ${m}`} />
@@ -118,16 +118,16 @@ export function MidiButton() {
   const on = midi.status === "on";
   const status =
     midi.status === "connecting"
-      ? "Connecting…"
+      ? "Conectando…"
       : midi.status === "denied"
-        ? "Blocked by the browser"
+        ? "Bloqueado pelo navegador"
         : on
           ? midi.inputs.length
             ? midi.inputs.join(", ")
-            : "Plug one in"
-          : "Off";
+            : "Conecte um"
+          : "Desligado";
   return (
-    <Chip on={on} onClick={() => setMidi(!on)} className="midi-chip" title={`MIDI keyboard: ${status}. ${on ? "Press to disconnect." : "Press to connect (the browser asks for access)."}`}>
+    <Chip on={on} onClick={() => setMidi(!on)} className="midi-chip" title={`Teclado MIDI: ${status}. ${on ? "Clique para desconectar." : "Clique para conectar (o navegador pede acesso)."}`}>
       MIDI{midi.status === "off" ? "" : `: ${status}`}
     </Chip>
   );

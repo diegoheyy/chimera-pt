@@ -33,10 +33,10 @@ export const singWords = mouthWords(sungNow, V.green);
 /** Sing mode's lines over the face: the note, the syllable, the ring */
 export const singInfo: InfoFn = (_m, _f, tele) => {
   const out: string[] = [];
-  if (tele && tele.t.voicing > 0.3) out.push(`Note ${noteName(tele.t.f0)} ${tele.t.f0.toFixed(0)} Hz`);
+  if (tele && tele.t.voicing > 0.3) out.push(`Nota ${noteName(tele.t.f0)} ${tele.t.f0.toFixed(0)} Hz`);
   const syl = syllableNow();
-  if (syl) out.push(`Syllable ${syl}`);
-  out.push(useStore.getState().artic.epilarynx >= RING - 0.05 ? "Ring on" : "Ring off");
+  if (syl) out.push(`Sílaba ${syl}`);
+  out.push(useStore.getState().artic.epilarynx >= RING - 0.05 ? "Ring ligado" : "Ring desligado");
   return out;
 };
 
@@ -59,18 +59,18 @@ function Lyrics() {
         onKeyDown={(e) => e.stopPropagation()}
         rows={Math.min(4, lyrics.split("\n").length)}
         lang={lang}
-        aria-label="Lyrics to sing"
-        placeholder="Type the words to sing"
-        title="Sing sings these words to the tune, a line to each of its phrases. Each key sings the next syllable; hold a key while you press the next one to sing legato. A lone “-” between words holds a vowel over several notes; hyphens split a word your way (“ti-ger”)."
+        aria-label="Letra para cantar"
+        placeholder="Digite a letra para cantar"
+        title="Cantar canta esta letra na melodia, uma linha para cada frase. Cada tecla canta a próxima sílaba; segure uma tecla enquanto aperta a próxima para cantar legato. Um “-” sozinho entre palavras sustenta uma vogal por várias notas; hífens dividem a palavra do seu jeito (“ca-sa”)."
       />
-      <div className="syllables" role="group" aria-label="Syllables. Each note sings the marked one; choose another to start there.">
+      <div className="syllables" role="group" aria-label="Sílabas. Cada nota canta a marcada; escolha outra para começar dela.">
         {syllables.map((s, i) => (
           <span key={i} className={`syl-wrap${s.wordEnd ? " word-end" : ""}`}>
             <button
               className={`syl${!demo && i === cursor ? " next" : ""}${i === at ? " now" : ""}${i < done ? " sung" : ""}${s.melisma ? " held" : ""}`}
               onClick={() => setCursor(i)}
               aria-current={!demo && i === cursor ? "step" : undefined}
-              title={s.melisma ? "Held vowel: carries the previous syllable onto this note" : `Sing from “${s.text}”`}
+              title={s.melisma ? "Vogal sustentada: leva a sílaba anterior para esta nota" : `Sing from “${s.text}”`}
             >
               {s.text}
             </button>
@@ -83,7 +83,7 @@ function Lyrics() {
         ))}
         {!syllables.length && <span className="dim">No words: the keys sing “ah”.</span>}
         <Chip toggle={false} className="from-start" onClick={() => setCursor(0)} disabled={cursor === 0 && !demo}>
-          From the start
+          Do início
         </Chip>
       </div>
     </div>
@@ -110,14 +110,14 @@ function SongControls() {
   const setKey = useSing((s) => s.setKey);
   return (
     <EncoderPages
-      label="Song voice"
+      label="Voz do canto"
       pages={[
         {
-          name: "Song",
+          name: "Canto",
           encoders: [
             { label: "Vibrato", value: vibrato, min: 0, max: 80, step: 1, onChange: (v) => setVibrato(Math.round(v)), format: (v) => ({ value: String(Math.round(v)), unit: "cents" }) },
-            { label: "Rate", value: source.vibratoRate, min: 3.5, max: 7.5, onChange: (v) => setSource({ vibratoRate: v }), format: (v) => ({ value: v.toFixed(1), unit: "Hz" }) },
-            { label: "Breathy", value: source.breathiness, min: 0, max: 1, onChange: (v) => setSource({ breathiness: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) },
+            { label: "Taxa", value: source.vibratoRate, min: 3.5, max: 7.5, onChange: (v) => setSource({ vibratoRate: v }), format: (v) => ({ value: v.toFixed(1), unit: "Hz" }) },
+            { label: "Soprosidade", value: source.breathiness, min: 0, max: 1, onChange: (v) => setSource({ breathiness: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) },
             // the singer's ring narrows the tube just above the folds, adding the bright band near 3 kHz
             { label: "Ring", value: epilarynx, min: 0, max: 1, onChange: (v) => setArtic({ epilarynx: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) },
           ],
@@ -127,16 +127,16 @@ function SongControls() {
           ? []
           : [
               {
-                name: "Tune",
+                name: "Melodia",
                 encoders: [
                   { label: "Tempo", value: tempo, min: 0.5, max: 1.5, step: 0.05, onChange: (v: number) => setTempo(Math.round(v * 20) / 20), format: (v: number) => ({ value: String(Math.round(v * 100)), unit: "%" }) },
-                  { label: "Key", value: key, min: -12, max: 12, step: 1, onChange: (v: number) => setKey(Math.round(v)), format: (v: number) => ({ value: (v > 0.5 ? "+" : "") + String(Math.round(v)), unit: "semitones" }) },
+                  { label: "Tom", value: key, min: -12, max: 12, step: 1, onChange: (v: number) => setKey(Math.round(v)), format: (v: number) => ({ value: (v > 0.5 ? "+" : "") + String(Math.round(v)), unit: "semitons" }) },
                 ],
               },
             ]),
         {
-          name: "Tone",
-          encoders: [{ label: "Bright", value: source.brightness, min: 0, max: 1, onChange: (v) => setSource({ brightness: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) }],
+          name: "Timbre",
+          encoders: [{ label: "Brilho", value: source.brightness, min: 0, max: 1, onChange: (v) => setSource({ brightness: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) }],
         },
       ]}
     />
@@ -230,10 +230,10 @@ function SingActions() {
   const press = () => (playing || pending ? stop() : sing(tune));
   const share = clip && typeof navigator.canShare === "function" && navigator.canShare({ files: [clip.file] });
   return (
-    <ActionBar label="Song" onSpace={press}>
-      <PrimaryButton label="Sing" playing={(!!playing || pending) && !recording} busy={recording ? "Recording…" : null} onClick={press} />
+    <ActionBar label="Canção" onSpace={press}>
+      <PrimaryButton label="Cantar" playing={(!!playing || pending) && !recording} busy={recording ? "Gravando…" : null} onClick={press} />
       <Menu
-        label="Tune"
+        label="Melodia"
         icon="note"
         value={tune}
         options={TUNES.map((t) => ({ value: t.id, label: t.name }))}
@@ -243,18 +243,18 @@ function SingActions() {
         }}
       />
       {canRecord() && (
-        <Chip toggle={false} onClick={() => (recording ? stop() : sing(tune, true))} title="Sing it again and record the face into a video">
-          {recording ? "Cancel" : "Record video"}
+        <Chip toggle={false} onClick={() => (recording ? stop() : sing(tune, true))} title="Cantar de novo e gravar o rosto em vídeo">
+          {recording ? "Cancelar" : "Gravar vídeo"}
         </Chip>
       )}
       {clip && share && (
         <Chip toggle={false} tone="amber" onClick={() => void navigator.share({ files: [clip.file] }).catch(() => {})}>
-          Share
+          Compartilhar
         </Chip>
       )}
       {clip && (
         <a className="chip" href={clip.url} download={clip.file.name}>
-          Save
+          Salvar
         </a>
       )}
     </ActionBar>
@@ -272,19 +272,19 @@ export function SingRight() {
     <div className="right right-sing">
       {/* the plugin sings what the host plays: no tunes to sing or record */}
       {!inPlugin && <SingActions />}
-      <Screen watch className="s-roll" title="Pitch">
+      <Screen watch className="s-roll" title="Altura">
         <PianoRoll />
       </Screen>
-      <Screen className="s-lyrics" title="Lyrics" tools={inPlugin ? undefined : <LyricsLang />}>
+      <Screen className="s-lyrics" title="Letra" tools={inPlugin ? undefined : <LyricsLang />}>
         <Lyrics />
       </Screen>
-      <Screen watch className="s-spec" title="Spectrum" sub={ring ? "Ring on" : ""}>
+      <Screen watch className="s-spec" title="Espectro" sub={ring ? "Ring ligado" : ""}>
         <SpectrumView ring={ring} />
       </Screen>
-      <Screen className="s-voice" title="Voice">
+      <Screen className="s-voice" title="Voz">
         <SongControls />
       </Screen>
-      <Screen className="s-keys" title="Keys" sub={next ? `Next: ${next}` : ""} tools={<MidiButton />}>
+      <Screen className="s-keys" title="Teclado" sub={next ? `Próxima: ${next}` : ""} tools={<MidiButton />}>
         <Keys />
       </Screen>
     </div>

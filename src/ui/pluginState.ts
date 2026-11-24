@@ -22,7 +22,7 @@ const REQUEST_TIMEOUT = 2000;
  * Linux it's in a browser, and the plugin stops serving it when its window in the DAW closes; elsewhere
  * a host can keep its main thread busy for a while. */
 const LOST_AFTER = 3000;
-const LOST = "No answer from the plugin. Open its window again.";
+const LOST = "O plugin não respondeu. Abra a janela dele de novo.";
 
 type Params = Record<string, number>;
 
@@ -139,7 +139,7 @@ async function poll(): Promise<void> {
     busy = audio = 0;
     loadAt = now;
   }
-  engine.error = faulted ? "The voice engine stopped. Reload the plugin to start it again." : null;
+  engine.error = faulted ? "O motor de voz parou. Recarregue o plugin para iniciar de novo." : null;
 
   // a restore replaced everything
   if (rev !== revision) {

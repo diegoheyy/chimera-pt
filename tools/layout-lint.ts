@@ -57,7 +57,9 @@ export const VIEWPORTS: { w: number; h: number; fit?: boolean }[] = [
   { w: 1920, h: 1080 },
   { w: 2560, h: 1440 },
 ];
-const MODES = ["play", "speak", "sing", "bestiary", "beatbox"] as const;
+const MODES = ["play", "speak", "sing", "bestiary", "beatbox", "lab"] as const;
+/** each mode's tab as the top bar names it */
+const MODE_LABEL: Record<string, string> = { play: "Tocar", speak: "Falar", sing: "Cantar", bestiary: "Bestiário", beatbox: "Beatbox", lab: "Laboratório" };
 /** with `--plugin` and `--url` of the UI harness: the window sizes and modes the plugin has */
 const PLUGIN_VIEWPORTS: { w: number; h: number }[] = [
   { w: 1120, h: 800 }, // LAYOUT_MIN in crates/chimera-plugin/src/bridge.rs: a smaller window is this, zoomed out
@@ -364,7 +366,7 @@ async function main() {
       for (const p of [...errs, ...warns]) console.log(`  ${p.warn ? "warn " : "ERROR"} ${p.kind.padEnd(11)} ${p.detail}`);
       if (errs.length) await page.screenshot({ path: `${out}/${w}x${h}-${state.replace(/[^a-z0-9]+/gi, "-")}.png`, fullPage: true });
     };
-    const mode = (m: string) => page.getByRole("radio", { name: new RegExp(`^${m}$`, "i") }).click();
+    const mode = (m: string) => page.getByRole("radio", { name: MODE_LABEL[m] ?? m, exact: true }).click();
     // every encoder shown, turned to each end and back: its readout must not move (a "0" turned to
     // "+1" once dropped the unit to a second line, and the screen under it jumped)
     const steady = async (state: string) => {

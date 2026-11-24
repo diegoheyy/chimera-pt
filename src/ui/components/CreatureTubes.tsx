@@ -43,5 +43,5 @@ export function CreatureTubes() {
       beamPts(ctx, botL, V.blue, 1.1);
     });
   });
-  return <canvas ref={ref} className="instrument-canvas" aria-label="Airway tubes unrolled, lit by sound pressure" role="img" />;
+  return <canvas ref={ref} className="instrument-canvas" aria-label="Tubos da via aérea desenrolados, iluminados pela pressão sonora" role="img" />;
 }

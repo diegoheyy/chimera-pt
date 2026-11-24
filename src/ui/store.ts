@@ -11,7 +11,7 @@ import { singNoteOn, singNoteOff, stopSinging } from "./singing.ts";
 import { stopSpeaking } from "./speech.ts";
 import { connectMidi, disconnectMidi, type MidiStatus } from "./midi.ts";
 
-export type Mode = "play" | "speak" | "sing" | "bestiary" | "beatbox";
+export type Mode = "play" | "speak" | "sing" | "bestiary" | "beatbox" | "lab";
 
 export interface BeatState {
   steps: (BeatStep | null)[];
@@ -163,7 +163,10 @@ export const useStore = create<State>((set, get) => ({
   lightAudio: false,
   overloaded: false,
   body: PRESETS.male,
-  source: { ...DEFAULT_SOURCE },
+  // in the browser a clearer voice than the engine's default: less leak through the folds, a firmer and
+  // brighter closure (about +4.5 dB at 2-4 kHz on a sustained [a], HNR unchanged; examples/breath_check.rs).
+  // The plugin keeps the engine's, which its projects were saved with
+  source: inPlugin ? { ...DEFAULT_SOURCE } : { ...DEFAULT_SOURCE, breathiness: 0.03, tension: 0.65, brightness: 0.46, roughness: 0.04, pressure: 8.5 },
   artic: (() => {
     const tip = restTip(NEUTRAL.jaw, NEUTRAL.tbX, NEUTRAL.tbY);
     return { ...NEUTRAL, ttX: tip.x, ttY: tip.y };
@@ -196,7 +199,7 @@ export const useStore = create<State>((set, get) => ({
       get().setSource({ voiced: false });
     }
     // speech belongs to Speak: under a creature the human clock stops and it would resume later
-    if (prev === "speak" || m === "bestiary") stopSpeaking();
+    if (prev === "speak" || prev === "lab" || m === "bestiary") stopSpeaking();
     if ((prev === "bestiary") !== (m === "bestiary")) {
       // a sustain belongs to the voice it was started on
       set({ hold: false });
@@ -211,7 +214,7 @@ export const useStore = create<State>((set, get) => ({
     }
     if (prev === "sing") stopSinging();
     // speech and song breathe by themselves: a held breath would drone under them
-    if (m === "speak" || m === "sing") set({ hold: false });
+    if (m === "speak" || m === "sing" || m === "lab") set({ hold: false });
     if (m === "beatbox") {
       // a beatboxer waits with the jaw nearly closed; the sounds bring their own breath
       set({ hold: false });

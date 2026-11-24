@@ -23,9 +23,9 @@ export function skippedLines(text: string): SkippedLine[] {
 
 export function skippedLinesOf(r: SkippedIpa): SkippedLine[] {
   const out: SkippedLine[] = [];
-  if (r.unknown.length) out.push({ what: "Not said", symbols: r.unknown });
-  if (r.noSound.length) out.push({ what: "No sound yet", symbols: r.noSound });
-  if (r.ignoredMarks.length) out.push({ what: "Mark ignored", symbols: r.ignoredMarks });
+  if (r.unknown.length) out.push({ what: "Não dito", symbols: r.unknown });
+  if (r.noSound.length) out.push({ what: "Ainda sem som", symbols: r.noSound });
+  if (r.ignoredMarks.length) out.push({ what: "Marca ignorada", symbols: r.ignoredMarks });
   return out;
 }
 

@@ -1,4 +1,4 @@
-//! `chimera render …`: ports of `tools/render-{speech,text,song,beatbox,creature,vowels}.ts`.
+﻿//! `chimera render …`: ports of `tools/render-{speech,text,song,beatbox,creature,vowels}.ts`.
 
 use crate::js::{fixed, num, pad_end, pad_start};
 use crate::{Ctx, FS, arg, body, body_mix, peak, repo_path, wav_name};
@@ -24,6 +24,7 @@ use chimera::phonetics::sing::{
 use chimera::phonetics::songs::DEMO_SONGS;
 use chimera::phonetics::mandarin::{MandarinLexicon, is_han};
 use chimera::phonetics::syllables::{Lang, lyrics_in, lyrics_to_syllables};
+use chimera::phonetics::portuguese::{self, Dialect};
 use chimera::phonetics::turkish;
 use chimera::phonetics::{Intonation, Plan, Syllable};
 use chimera::voice::human_voice::{HumanVoice, SCOPE_POINTS, SourcePatch, VoiceTelemetry};
@@ -254,6 +255,23 @@ pub fn turkish(ctx: &Ctx, a: &[String]) -> Result<(), String> {
     let text = arg(a, 1, "Merhaba, nasılsın?");
     let body_name = arg(a, 2, "male");
     let s = say_phrases(&turkish::to_phrases(text), body_name)?;
+    println!("{}", s.shown);
+    let file = wav_name(name);
+    ctx.write_wav(&file, &s.out)?;
+    println!("wrote {file}  {} s", fixed(s.out.len() as f64 / FS, 2));
+    Ok(())
+}
+
+/// Brazilian Portuguese text through its spelling rules and the phrase planner, in an accent.
+/// `render portuguese <out> ["Texto em português."] [body] [paulistano|carioca|nordestino|caipira|gaucho]`
+pub fn portuguese(ctx: &Ctx, a: &[String]) -> Result<(), String> {
+    let name = arg(a, 0, "out/portuguese");
+    let text = arg(a, 1, "Oi, tudo bem?");
+    let body_name = arg(a, 2, "male");
+    let dialect_name = arg(a, 3, "paulistano");
+    let dialect = Dialect::from_name(dialect_name).ok_or_else(|| format!("no accent {dialect_name}: paulistano, carioca, nordestino, caipira or gaucho"))?;
+    println!("{}", portuguese::transcribe(text, dialect));
+    let s = say_phrases(&portuguese::to_phrases(text, dialect), body_name)?;
     println!("{}", s.shown);
     let file = wav_name(name);
     ctx.write_wav(&file, &s.out)?;
@@ -567,7 +585,7 @@ pub fn notes(ctx: &Ctx, a: &[String]) -> Result<(), String> {
     let vibrato = j["vibrato"].as_f64().unwrap_or(35.0);
     let raw: Vec<[f64; 2]> = serde_json::from_value(j["notes"].clone()).map_err(|e| format!("notes: {e}"))?;
     // "syllables" sing what a language front end wrote; otherwise the lyrics go through the front
-    // ends, Latin script read as "lang" ("en", the default, or "tr")
+    // ends, Latin script read as "lang" ("en", the default, "tr" or "pt")
     let syl: Vec<Syllable> = if j.get("syllables").is_some() {
         serde_json::from_value(j["syllables"].clone()).map_err(|e| format!("syllables: {e}"))?
     } else {

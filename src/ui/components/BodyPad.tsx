@@ -60,7 +60,7 @@ export function BodyPad() {
       className="body-pad"
       role="slider"
       tabIndex={0}
-      aria-label="Body between male, female and child"
+      aria-label="Corpo entre homem, mulher e criança"
       aria-valuetext={bodyLabel(body)}
       aria-valuenow={Math.round(body.child * 100)}
       aria-valuemin={0}

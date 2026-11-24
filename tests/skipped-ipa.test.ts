@@ -42,11 +42,11 @@ describe("the Speak notice", () => {
   });
 
   test("the delimiters of /phonemic/ and [phonetic] IPA are not listed", () => {
-    for (const t of ["/a˥/", "[a˥]"]) expect(skippedLines(t).map(skippedText)).toEqual(["Not said: ˥"]);
+    for (const t of ["/a˥/", "[a˥]"]) expect(skippedLines(t).map(skippedText)).toEqual(["Não dito: ˥"]);
   });
 
   test("a symbol with no sound gets its own short line", () => {
-    expect(skippedLines("ʏ").map(skippedText)).toEqual(["No sound yet: ʏ"]);
+    expect(skippedLines("ʏ").map(skippedText)).toEqual(["Ainda sem som: ʏ"]);
   });
 
   test("the syllabic and non-syllabic marks are not reported", () => {
@@ -55,6 +55,6 @@ describe("the Speak notice", () => {
 
   test("one line per kind, in plain words", () => {
     const lines = skippedLines("a˥ n̥");
-    expect(lines.map(skippedText)).toEqual(["Not said: ˥", "Mark ignored: n̥"]);
+    expect(lines.map(skippedText)).toEqual(["Não dito: ˥", "Marca ignorada: n̥"]);
   });
 });

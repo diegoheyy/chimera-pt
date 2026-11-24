@@ -85,5 +85,5 @@ export function Spectrogram() {
     label(ctx, `${(SLICES * EVERY).toFixed(0)} S AGO`, right + 4, base - depthY + 3, { size: LABEL_MIN, color: TEXT.secondary, ls: 0.14 });
     if (!started) label(ctx, "START AUDIO TO SEE THE SOUND", left, 24, { size: LABEL_MIN, color: TEXT.secondary, ls: 0.16 });
   });
-  return <canvas ref={ref} className="instrument-canvas" aria-label="Waterfall spectrogram of the last two seconds of output" role="img" />;
+  return <canvas ref={ref} className="instrument-canvas" aria-label="Espectrograma dos últimos dois segundos de saída" role="img" />;
 }

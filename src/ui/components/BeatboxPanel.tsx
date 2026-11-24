@@ -14,11 +14,11 @@ import { V } from "../colors.ts";
 import { MAX_BEAT_STEPS } from "../../wasm/wire.ts";
 
 const AIR: Record<Airstream, string> = {
-  pulmonic: "Breath out",
-  ejective: "Larynx piston",
-  click: "Tongue suction",
-  ingressive: "Breath in",
-  voiced: "Voice",
+  pulmonic: "Expiração",
+  ejective: "Pistão laríngeo",
+  click: "Sucção da língua",
+  ingressive: "Inspiração",
+  voiced: "Voz",
 };
 
 const NOTE = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
@@ -42,10 +42,10 @@ export function useBeatStep(): number {
 
 /** Beatbox's readouts under the chin: the articulators a mouth drum uses */
 export const beatSlots: SlotsFn = (_m, a, f) => [
-  { label: "Jaw", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
-  { label: "Lips", value: a.lipAp < 0.05 ? "Sealed" : a.lipWidth < 0.55 ? "Round" : "Open", color: V.pink },
-  { label: "Larynx", value: `${a.larynx >= 0 ? "+" : ""}${a.larynx.toFixed(1)}`, unit: "cm", color: V.green },
-  { label: "Soft palate", value: f.velumPort > 0.02 ? "Open" : "Shut", color: V.white },
+  { label: "Mandíbula", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
+  { label: "Lábios", value: a.lipAp < 0.05 ? "Selados" : a.lipWidth < 0.55 ? "Arredondados" : "Abertos", color: V.pink },
+  { label: "Laringe", value: `${a.larynx >= 0 ? "+" : ""}${a.larynx.toFixed(1)}`, unit: "cm", color: V.green },
+  { label: "Véu palatino", value: f.velumPort > 0.02 ? "Aberto" : "Fechado", color: V.white },
 ];
 /** the big symbol owns the top right, so nothing else is written there */
 export const beatInfo: InfoFn = () => [];
@@ -110,7 +110,7 @@ function Sequencer() {
   const toggle = useStore((s) => s.toggleBeatStep);
   const now = useBeatStep();
   return (
-    <div className="seq-grid" style={{ "--steps": beat.steps.length } as React.CSSProperties} role="grid" aria-label="Beat pattern: one sound per step">
+    <div className="seq-grid" style={{ "--steps": beat.steps.length } as React.CSSProperties} role="grid" aria-label="Padrão de batida: um som por passo">
       {BEAT_SOUNDS.map((s) => (
         <div className="seq-row" role="row" key={s.id}>
           <span className="seq-label" role="rowheader">
@@ -150,21 +150,21 @@ function BeatActions() {
   const setMic = useStore((s) => s.setMic);
   const press = () => !following && setPlaying(!playing);
   return (
-    <ActionBar label="Beat" onSpace={press}>
-      <PrimaryButton label="Play beat" playing={playing} busy={following ? "With host" : null} title={following ? "The host's transport is running the beat" : undefined} onClick={press} />
+    <ActionBar label="Batida" onSpace={press}>
+      <PrimaryButton label="Tocar batida" playing={playing} busy={following ? "Com o host" : null} title={following ? "O transporte do host está tocando a batida" : undefined} onClick={press} />
       <Menu
-        label="Pattern"
+        label="Padrão"
         value={preset ?? ""}
-        options={[...(preset ? [] : [{ value: "", label: "Your beat", disabled: true }]), ...BEAT_PRESETS.map((p) => ({ value: p.name, label: p.name }))]}
+        options={[...(preset ? [] : [{ value: "", label: "Sua batida", disabled: true }]), ...BEAT_PRESETS.map((p) => ({ value: p.name, label: p.name }))]}
         onChange={(name) => loadPreset(name)}
       />
-      {/* an effect on the sound, not the microphone: "Close mic" read as "shut the mic" */}
-      <Chip on={mic} onClick={() => setMic(!mic)} title="Close-mic effect: the bass, presence and squash of a mic held to the lips">
+      {/* an effect on the sound, not the microphone: "Microfone próximo" read as "shut the mic" */}
+      <Chip on={mic} onClick={() => setMic(!mic)} title="Efeito de microfone próximo: o grave, a presença e a compressão de um microfone colado aos lábios">
         Mic FX
       </Chip>
       {inPlugin && (
-        <Chip on={follow} onClick={() => setFollow(!follow)} title="Run the pattern with the host's transport, at its tempo">
-          Follow
+        <Chip on={follow} onClick={() => setFollow(!follow)} title="Tocar o padrão com o transporte do host, no andamento dele">
+          Seguir
         </Chip>
       )}
     </ActionBar>
@@ -176,13 +176,13 @@ function Transport() {
   const setTempo = useStore((s) => s.setBeatTempo);
   return (
     <EncoderPages
-      label="Transport"
+      label="Transporte"
       columns={2}
       pages={[
         {
           name: "Tempo",
           encoders: [
-            { label: "Tempo", value: beat.following ? beat.hostBpm : beat.bpm, min: 60, max: 240, step: 1, onChange: (v) => setTempo({ bpm: Math.round(v) }), format: (v) => ({ value: String(Math.round(v)), unit: "bpm" }) },
+            { label: "Andamento", value: beat.following ? beat.hostBpm : beat.bpm, min: 60, max: 240, step: 1, onChange: (v) => setTempo({ bpm: Math.round(v) }), format: (v) => ({ value: String(Math.round(v)), unit: "bpm" }) },
             { label: "Swing", value: beat.swing, min: 0, max: 0.6, onChange: (v) => setTempo({ swing: v }), format: (v) => ({ value: String(Math.round(v * 100)), unit: "%" }) },
           ],
         },
@@ -202,7 +202,7 @@ function BeatText() {
   }, [steps]);
   return (
     <label className="sbn">
-      <span className="dim">Beat as text</span>
+      <span className="dim">Batida como texto</span>
       <input
         value={text}
         title={`B kick, t hat, Pf snare, K rimshot, ^K inward, ! click, m hum (m:43 sets its note), . rest. Up to ${MAX_BEAT_STEPS} steps.`}
@@ -228,20 +228,20 @@ export function BeatboxRight() {
   return (
     <div className="right right-beatbox">
       <BeatActions />
-      <Screen className="s-seq" title="Step sequencer" tools={<BeatText />}>
+      <Screen className="s-seq" title="Sequenciador" tools={<BeatText />}>
         <Sequencer />
       </Screen>
-      <Screen watch className="s-wf" title="Spectrogram">
+      <Screen watch className="s-wf" title="Espectrograma">
         <Spectrogram />
       </Screen>
       <Screen className="s-pads" title="Pads">
         <Pads />
       </Screen>
-      <Screen className="s-transport" title="Tempo">
+      <Screen className="s-transport" title="Andamento">
         <Transport />
       </Screen>
       {/* the keys hum a bass note under the beat */}
-      <Screen className="s-keys s-keys-compact" title="Bass" tools={<MidiButton />}>
+      <Screen className="s-keys s-keys-compact" title="Baixo" tools={<MidiButton />}>
         <Keys />
       </Screen>
     </div>

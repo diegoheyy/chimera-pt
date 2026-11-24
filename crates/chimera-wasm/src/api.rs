@@ -14,6 +14,7 @@ use chimera::phonetics::sing::{self, MelismaOptions, NoteOnOptions, SongOptions,
 use chimera::phonetics::english::EnglishG2P;
 use chimera::phonetics::mandarin::MandarinLexicon;
 use chimera::phonetics::syllables::{Lang, lyrics_in};
+use chimera::phonetics::portuguese::{self, Dialect};
 use chimera::phonetics::{Segment, Syllable, ipa, songs, turkish, vowel_data};
 use chimera::voice::human_airway::HumanAirway;
 use serde_json::{Value, json};
@@ -139,6 +140,10 @@ fn dispatch(st: &mut State, req: &Value) -> Res {
         "lyricsToSyllables" => to_json(&lyrics_in(&arg::<String>(req, "text")?, &st.g2p, &st.mandarin, arg::<Option<Lang>>(req, "lang")?.unwrap_or_default())),
         // Turkish needs no dictionary: its spelling rules are the G2P
         "trPhrases" => to_json(&turkish::to_phrases(&arg::<String>(req, "text")?)),
+        // Brazilian Portuguese by spelling rules, in an accent (`dialect`; unset: paulistano)
+        "ptPhrases" => to_json(&portuguese::to_phrases(&arg::<String>(req, "text")?, arg::<Option<Dialect>>(req, "dialect")?.unwrap_or_default())),
+        // its broad IPA: syllables split by dots, ˈ before the stressed one
+        "ptTranscribe" => to_json(&portuguese::transcribe(&arg::<String>(req, "text")?, arg::<Option<Dialect>>(req, "dialect")?.unwrap_or_default())),
         // ---------------------------------------------------------------- creatures
         "creaturePreview" => {
             let id: String = arg(req, "id")?;

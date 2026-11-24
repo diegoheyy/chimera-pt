@@ -28,7 +28,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${outDir}/${tag}-0-idle.png` });
   // the app opens on Sing; this run starts in Play
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   if (tag === "desktop") await grabTongueFirst(page, tag);
   else {
     // each tab's main button starts the audio: Play's breathes
@@ -85,7 +85,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   const loadText = await page.locator(".load").textContent().catch(() => null);
   logs.push(`[${tag}] load: ${loadText}`);
   // speak mode
-  await page.getByRole("radio", { name: "Speak" }).click();
+  await page.getByRole("radio", { name: "Falar" }).click();
   await page.waitForTimeout(200);
   await page.getByRole("button", { name: /^Speak$/ }).click();
   await page.waitForTimeout(1500);
@@ -107,9 +107,9 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   if (!(Math.max(...speechRms.slice(-3)) < 1e-3)) errors.push(`[${tag}] voice still sounding after the phrase: ${speechRms.slice(-3).join(",")}`);
   // the Examples menu puts a phrase in the box as text (not IPA), then reads Examples again, so
   // the same phrase can be picked a second time
-  const examples = page.getByRole("combobox", { name: "Examples" });
+  const examples = page.getByRole("combobox", { name: "Exemplos" });
   const sayBox = page.locator(".say textarea");
-  const ipaChip = page.getByRole("button", { name: "Text is IPA" });
+  const ipaChip = page.getByRole("button", { name: "Texto em IPA" });
   const SHELLS = "She sells sea shells by the sea shore.";
   await ipaChip.click();
   await examples.selectOption({ label: SHELLS });
@@ -145,19 +145,19 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   if (await noticeText()) errors.push(`[${tag}] turning IPA mode off left the notice: ${await noticeText()}`);
   // one language for Speak and Sing: TR chosen in Speak is lit in Sing, and still chosen when Speak
   // comes back (it was Speak's own state, reset whenever the tab remounted)
-  const tr = (scope: string) => page.locator(scope).getByRole("button", { name: "Turkish" });
+  const tr = (scope: string) => page.locator(scope).getByRole("button", { name: "Turco" });
   await tr(".right-speak").click();
-  await page.getByRole("radio", { name: "Sing" }).click();
+  await page.getByRole("radio", { name: "Cantar" }).click();
   await page.waitForTimeout(200);
   const inSing = await tr(".s-lyrics").getAttribute("aria-pressed");
-  await page.getByRole("radio", { name: "Speak" }).click();
+  await page.getByRole("radio", { name: "Falar" }).click();
   await page.waitForTimeout(200);
   const speakAgain = { chip: await tr(".right-speak").getAttribute("aria-pressed"), box: await sayBox.inputValue() };
   logs.push(`[${tag}] language: TR in Speak, in Sing ${inSing}; Speak again ${JSON.stringify(speakAgain)}`);
   if (inSing !== "true" || speakAgain.chip !== "true" || speakAgain.box !== "Merhaba, nasılsın?") errors.push(`[${tag}] Speak and Sing don't share the language (Sing ${inSing}, Speak again ${JSON.stringify(speakAgain)})`);
-  await page.locator(".right-speak").getByRole("button", { name: "English" }).click();
+  await page.locator(".right-speak").getByRole("button", { name: "Inglês" }).click();
   // sing mode: a key sings the marked syllable and moves the cursor; legato; a demo song
-  await page.getByRole("radio", { name: "Sing" }).click();
+  await page.getByRole("radio", { name: "Cantar" }).click();
   await page.waitForTimeout(600);
   const rms = () =>
     page.evaluate(() => {
@@ -182,12 +182,12 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   if (!(after < 1e-3)) errors.push(`[${tag}] voice still sounding after the sung notes: ${after}`);
   if (sylBefore === sylAfter) errors.push(`[${tag}] the syllable cursor did not move (${sylBefore})`);
   // a menu isn't an instrument: a letter typed in it picks an entry, it doesn't play a note
-  await page.getByRole("combobox", { name: "Tune" }).focus();
+  await page.getByRole("combobox", { name: "Melodia" }).focus();
   await page.keyboard.down("d");
   const menuNotes = await page.locator(".keys .key.down").count();
   await page.keyboard.up("d");
   if (menuNotes) errors.push(`[${tag}] a key typed in the tune menu played a note`);
-  await page.getByRole("combobox", { name: "Tune" }).selectOption({ label: "Dreamy" });
+  await page.getByRole("combobox", { name: "Melodia" }).selectOption({ label: "Sonhador" });
   await page.getByRole("button", { name: /^Sing$/ }).click();
   await page.waitForTimeout(2200);
   const demoRms = await rms();
@@ -200,7 +200,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   if (!(demoRms > 0.01) || !demoNow) errors.push(`[${tag}] the tune is not singing the lyrics (rms ${demoRms}, syllable ${demoNow})`);
   if (!(demoStopped < 1e-3)) errors.push(`[${tag}] the tune still sounding after stop: ${demoStopped}`);
   // bestiary: every creature, its first call, a key in held-voice mode, and the sustain toggle
-  await page.getByRole("radio", { name: "Bestiary" }).click();
+  await page.getByRole("radio", { name: "Bestiário" }).click();
   await page.waitForTimeout(300);
   const names = await page.locator(".specimen-name").allTextContents();
   for (const [i, name] of names.entries()) {
@@ -244,7 +244,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   // beatbox: preset, play, playhead + level from telemetry, a pad, stop
   await page.getByRole("radio", { name: "Beatbox" }).click();
   await page.waitForTimeout(300);
-  await page.getByRole("combobox", { name: "Pattern" }).selectOption("Breakbeat");
+  await page.getByRole("combobox", { name: "Padrão" }).selectOption("Breakbeat");
   await page.getByRole("button", { name: /^Play beat$/ }).click();
   const beatSamples: { step: number; rms: number }[] = [];
   for (let i = 0; i < 8; i++) {
@@ -274,7 +274,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   logs.push(`[${tag}] beatbox space: playing ${spaceOn}, stopped ${spaceOff}`);
   if (spaceOn !== 1 || spaceOff !== 1) errors.push(`[${tag}] Space didn't start and stop the beat (${spaceOn}, ${spaceOff})`);
   // back to the human voice
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   await page.waitForTimeout(600);
   const human = await page.evaluate(() => {
     // @ts-expect-error debug handle
@@ -307,9 +307,9 @@ async function run(viewport: { width: number; height: number }, tag: string) {
     };
   });
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   await page.getByRole("button", { name: /^Breathe$/ }).click();
-  const failed = await page.getByText(/Audio could not start/).waitFor({ timeout: 10000 }).then(() => true, () => false);
+  const failed = await page.getByText(/O áudio não pôde iniciar/).waitFor({ timeout: 10000 }).then(() => true, () => false);
   await page.getByRole("button", { name: /^Breathe$/ }).click();
   await page.waitForTimeout(1500);
   const running = await page.evaluate(() => {
@@ -328,7 +328,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   page.on("pageerror", (e) => errors.push(`[first-key] pageerror: ${e.message}`));
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByRole("radio", { name: "Sing" }).click();
+  await page.getByRole("radio", { name: "Cantar" }).click();
   await page.keyboard.down("d");
   await page.waitForTimeout(1200);
   const level = await page.evaluate(() => {
@@ -349,7 +349,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
   await page.goto(url, { waitUntil: "networkidle" });
   const stuck: string[] = [];
   let turned = 0;
-  for (const mode of ["Sing", "Beatbox"]) {
+  for (const mode of ["Cantar", "Beatbox"]) {
     await page.getByRole("radio", { name: mode }).click();
     const tabs = page.locator(".right .enc-tab");
     for (let t = 0; t < Math.max(1, await tabs.count()); t++) {
@@ -388,7 +388,7 @@ async function run(viewport: { width: number; height: number }, tag: string) {
     };
   });
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   await page.getByRole("button", { name: /^Breathe$/ }).click();
   await page.waitForTimeout(1500);
   const rate = await page.evaluate(() => {
@@ -445,7 +445,7 @@ for (const slowAt of ["48000", "any", "48000-gesture"]) {
     };
   }, slowAt);
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByRole("radio", { name: "Play" }).click();
+  await page.getByRole("radio", { name: "Tocar" }).click();
   await page.getByRole("button", { name: /^Breathe$/ }).click();
   // the start's warm-up and the averaging, at each rate
   await page.waitForTimeout(10000);
@@ -468,7 +468,7 @@ for (const slowAt of ["48000", "any", "48000-gesture"]) {
     logs.push(`[${tag}] the 32 kHz context was ${held} until a tap`);
     if (held !== "suspended") errors.push(`[${tag}] the held context was ${held} before the tap (the test's patch didn't hold it)`);
   }
-  const warned = await page.getByText(/This device can't keep up/).isVisible();
+  const warned = await page.getByText(/Este aparelho não está dando conta/).isVisible();
   const badge = await page.getByText(/· 32 kHz/).isVisible();
   logs.push(`[${tag}] slow device: runs at ${state.rate} Hz, rms ${state.rms.toFixed(4)}, 32 kHz shown ${badge}, warning ${warned}`);
   if (state.rate !== 32000) errors.push(`[${tag}] a device too slow for 48 kHz ran at ${state.rate} Hz (want 32000)`);
@@ -486,7 +486,7 @@ for (const slowAt of ["48000", "any", "48000-gesture"]) {
   page.on("pageerror", (e) => errors.push(`[video] pageerror: ${e.message}`));
   await page.goto(url, { waitUntil: "networkidle" });
   await page.locator(".lyrics textarea").fill("one two three");
-  await page.getByRole("combobox", { name: "Tune" }).selectOption({ label: "Playful" });
+  await page.getByRole("combobox", { name: "Melodia" }).selectOption({ label: "Brincalhão" });
   await page.getByRole("button", { name: /^Record video$/ }).click();
   await page.getByRole("button", { name: /^Cancel$/ }).waitFor({ timeout: 10000 });
   await page.waitForTimeout(800);
@@ -503,7 +503,7 @@ for (const slowAt of ["48000", "any", "48000-gesture"]) {
   // the words and the tune come back on reload
   await page.reload({ waitUntil: "networkidle" });
   const words = await page.locator(".lyrics textarea").inputValue();
-  const tune = await page.getByRole("combobox", { name: "Tune" }).inputValue();
+  const tune = await page.getByRole("combobox", { name: "Melodia" }).inputValue();
   if (words !== "one two three" || tune !== "playful") errors.push(`[video] the song didn't come back on reload: "${words}" to ${tune}`);
   await page.close();
 }

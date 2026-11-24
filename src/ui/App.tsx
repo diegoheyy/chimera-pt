@@ -17,6 +17,7 @@ import { BestiaryRight } from "./components/BestiaryPanel.tsx";
 import { CreatureView } from "./components/CreatureView.tsx";
 import { BeatboxRight, BeatOverlay, beatInfo, beatSlots } from "./components/BeatboxPanel.tsx";
 import { SingRight, singInfo, singWords } from "./components/SingPanel.tsx";
+import { LabRight } from "./components/LabPanel.tsx";
 import type { Mode } from "./store.ts";
 import type { BodyName } from "../worklet/protocol.ts";
 import { BodyPad } from "./components/BodyPad.tsx";
@@ -54,26 +55,27 @@ function TopBar() {
     <header className="topbar">
       <div className="brand">
         <span className="wordmark">Chimera</span>
-        <span className="tagline">A voice grown from a simulated airway</span>
+        <span className="tagline">Uma voz nascida de uma via aérea simulada</span>
       </div>
       <Segmented<Mode>
-        label="Mode"
+        label="Modo"
         value={mode}
         onChange={setMode}
         options={
           inPlugin
             ? [
-                { value: "sing", label: "Sing" },
-                { value: "play", label: "Play" },
-                { value: "speak", label: "Speak" },
+                { value: "sing", label: "Cantar" },
+                { value: "play", label: "Tocar" },
+                { value: "speak", label: "Falar" },
                 { value: "beatbox", label: "Beatbox" },
               ]
             : [
-                { value: "play", label: "Play" },
-                { value: "speak", label: "Speak" },
-                { value: "sing", label: "Sing" },
-                { value: "bestiary", label: "Bestiary" },
+                { value: "play", label: "Tocar" },
+                { value: "speak", label: "Falar" },
+                { value: "sing", label: "Cantar" },
+                { value: "bestiary", label: "Bestiário" },
                 { value: "beatbox", label: "Beatbox" },
+                { value: "lab", label: "Laboratório" },
               ]
         }
       />
@@ -85,17 +87,17 @@ function TopBar() {
         {stopped ? (
           <span className="load error">{stopped}</span>
         ) : started ? (
-          <span className="load" title={"Share of the audio thread's time budget used by the simulation" + (light ? ". This device couldn't keep up at 48 kHz, so the voice runs at 32 kHz: lighter, a little duller. Reload to try 48 kHz again." : "")}>
-            Engine load {Math.round(load * 100)} %{light && " · 32 kHz"}
+          <span className="load" title={"Parte do tempo da thread de áudio usada pela simulação" + (light ? ". Este aparelho não aguentou 48 kHz, então a voz roda a 32 kHz: mais leve, um pouco mais abafada. Recarregue para tentar 48 kHz de novo." : "")}>
+            Carga do motor {Math.round(load * 100)} %{light && " · 32 kHz"}
           </span>
         ) : null}
         {!inPlugin && (
-          <a className="plugin-link" href="/plugin/" title="CHIMERA as a CLAP, VST3 and AU plugin for your DAW">
+          <a className="plugin-link" href={`${import.meta.env.BASE_URL}plugin/`} title="CHIMERA como plugin CLAP, VST3 e AU para sua DAW">
             Plugin
           </a>
         )}
         {!inPlugin && (
-          <a className="repo-link" href="https://github.com/jamesondh/chimera-vocal-synth" target="_blank" rel="noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub">
+          <a className="repo-link" href="https://github.com/jamesondh/chimera-vocal-synth" target="_blank" rel="noreferrer" aria-label="Código-fonte no GitHub" title="Código-fonte no GitHub">
             <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
               <path
                 fill="currentColor"
@@ -116,10 +118,10 @@ function ViewToggles() {
   return (
     <div className="view-toggles">
       {!bestiary && <Toggle label="3D" checked={view.threeD} onChange={(v) => setView({ threeD: v })} />}
-      <Toggle label="Sound pressure" checked={view.pressure} onChange={(v) => setView({ pressure: v })} />
-      {!bestiary && <Toggle label="Airflow" checked={view.particles} onChange={(v) => setView({ particles: v })} />}
-      <Toggle label={bestiary ? "Labels" : "Measurements"} checked={view.calipers} onChange={(v) => setView({ calipers: v })} />
-      {!bestiary && <Toggle label="Grid" checked={view.grid} onChange={(v) => setView({ grid: v })} />}
+      <Toggle label="Pressão sonora" checked={view.pressure} onChange={(v) => setView({ pressure: v })} />
+      {!bestiary && <Toggle label="Fluxo de ar" checked={view.particles} onChange={(v) => setView({ particles: v })} />}
+      <Toggle label={bestiary ? "Rótulos" : "Medidas"} checked={view.calipers} onChange={(v) => setView({ calipers: v })} />
+      {!bestiary && <Toggle label="Grade" checked={view.grid} onChange={(v) => setView({ grid: v })} />}
     </div>
   );
 }
@@ -131,13 +133,13 @@ function BodyControl() {
   return (
     <div className="body-control">
       <Segmented<BodyName>
-        label="Body"
+        label="Corpo"
         value={presetOf(body)}
         onChange={(b) => setBody(PRESETS[b])}
         options={[
-          { value: "male", label: "Male" },
-          { value: "female", label: "Female" },
-          { value: "child", label: "Child" },
+          { value: "male", label: "Homem" },
+          { value: "female", label: "Mulher" },
+          { value: "child", label: "Criança" },
         ]}
       />
       <BodyPad />
@@ -152,9 +154,9 @@ function LeftScreen() {
   const bestiary = mode === "bestiary";
   const Face = threeD ? AnatomyView3D : AnatomyView;
   return (
-    <Screen className="left" focus lead={bestiary ? undefined : <BodyControl />} label={bestiary ? "Live creature airway" : "Live vocal tract"} tools={<ViewToggles />}>
+    <Screen className="left" focus lead={bestiary ? undefined : <BodyControl />} label={bestiary ? "Via aérea da criatura ao vivo" : "Trato vocal ao vivo"} tools={<ViewToggles />}>
       <Suspense fallback={null}>
-        {bestiary ? <CreatureView /> : mode === "speak" ? <Face slots={speechSlots} info={speechInfo} overlay={speechWords} /> : mode === "sing" ? <Face info={singInfo} overlay={singWords} /> : mode === "beatbox" ? <Face slots={beatSlots} info={beatInfo} showFormants={false} /> : <Face />}
+        {bestiary ? <CreatureView /> : mode === "speak" || mode === "lab" ? <Face slots={speechSlots} info={speechInfo} overlay={speechWords} /> : mode === "sing" ? <Face info={singInfo} overlay={singWords} /> : mode === "beatbox" ? <Face slots={beatSlots} info={beatInfo} showFormants={false} /> : <Face />}
       </Suspense>
       {mode === "beatbox" && <BeatOverlay />}
     </Screen>
@@ -168,10 +170,10 @@ function PlayActions() {
   const voiced = useStore((s) => s.source.voiced);
   const setSource = useStore((s) => s.setSource);
   return (
-    <ActionBar label="Voice" onSpace={() => void toggleBreath()}>
-      <PrimaryButton label="Breathe" icon="breath" playing={hold} onClick={() => void toggleBreath()} />
+    <ActionBar label="Voz" onSpace={() => void toggleBreath()}>
+      <PrimaryButton label="Respirar" icon="breath" playing={hold} onClick={() => void toggleBreath()} />
       <Chip on={!voiced} onClick={() => setSource({ voiced: !voiced })}>
-        Whisper
+        Sussurro
       </Chip>
     </ActionBar>
   );
@@ -182,22 +184,22 @@ function PlayRight() {
   return (
     <div className="right right-play">
       <PlayActions />
-      <Screen watch className="s-tube" title="Tube" sub="Glottis to lips">
+      <Screen watch className="s-tube" title="Tubo" sub="Da glote aos lábios">
         <TubeView />
       </Screen>
-      <Screen watch className="s-folds" title="Vocal folds" sub="Slowed 100×">
+      <Screen watch className="s-folds" title="Pregas vocais" sub="100× mais lento">
         <Stroboscope />
       </Screen>
-      <Screen watch className="s-spec" title="Spectrum">
+      <Screen watch className="s-spec" title="Espectro">
         <SpectrumView />
       </Screen>
-      <Screen className="s-vowels" title="Vowels" sub="F1 / F2">
+      <Screen className="s-vowels" title="Vogais" sub="F1 / F2">
         <VowelMap />
       </Screen>
-      <Screen className="s-voice" title="Voice">
+      <Screen className="s-voice" title="Voz">
         <VoiceControls />
       </Screen>
-      <Screen className="s-keys" title="Keys" sub={`${Math.round(f0)} Hz`} tools={<MidiButton />}>
+      <Screen className="s-keys" title="Teclado" sub={`${Math.round(f0)} Hz`} tools={<MidiButton />}>
         <Keys />
       </Screen>
     </div>
@@ -222,7 +224,7 @@ function Wall() {
       <TopBar />
       <main className={`wall wall-${mode}`}>
         <LeftScreen />
-        {mode === "play" ? <PlayRight /> : mode === "speak" ? <SpeakRight /> : mode === "sing" ? <SingRight /> : mode === "beatbox" ? <BeatboxRight /> : <BestiaryRight />}
+        {mode === "play" ? <PlayRight /> : mode === "speak" ? <SpeakRight /> : mode === "lab" ? <LabRight /> : mode === "sing" ? <SingRight /> : mode === "beatbox" ? <BeatboxRight /> : <BestiaryRight />}
       </main>
       {inPlugin && <ResizeGrip />}
     </div>

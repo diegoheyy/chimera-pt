@@ -8,11 +8,11 @@ import { beam, beamPts, blockLineH, label, LABEL_MIN, labelBlock, type LabelOpts
 
 /** rows of the score, coloured like the articulators on the face (lips pink, tongue green, soft palate white, glottis amber) */
 const ROWS: { name: string; keys: string[]; color: string }[] = [
-  { name: "Lips", keys: ["lipAp", "lipProt", "lipWidth", "labiodental"], color: V.pink },
-  { name: "Tongue tip", keys: ["ttX", "ttY", "ttCurl", "lateral"], color: V.green },
-  { name: "Tongue body", keys: ["tbX", "tbY", "root"], color: V.green },
-  { name: "Soft palate", keys: ["velum"], color: V.white },
-  { name: "Glottis", keys: ["abduction", "closure"], color: V.amber },
+  { name: "Lábios", keys: ["lipAp", "lipProt", "lipWidth", "labiodental"], color: V.pink },
+  { name: "Ponta da língua", keys: ["ttX", "ttY", "ttCurl", "lateral"], color: V.green },
+  { name: "Dorso da língua", keys: ["tbX", "tbY", "root"], color: V.green },
+  { name: "Véu palatino", keys: ["velum"], color: V.white },
+  { name: "Glote", keys: ["abduction", "closure"], color: V.amber },
 ];
 
 /**
@@ -123,5 +123,5 @@ export function ScoreView() {
       label(ctx, `${Math.max(0, now).toFixed(2)} S`, x + 8, top - 4, { size: LABEL_MIN, color: mix(V.white, "#000000", 0.2), ls: 0.12 });
     }
   });
-  return <canvas ref={ref} className="score-canvas" aria-label="Gestural score of the current utterance: which articulator moves, when, and how they overlap" role="img" />;
+  return <canvas ref={ref} className="score-canvas" aria-label="Partitura gestual da fala atual: qual articulador se move, quando, e como se sobrepõem" role="img" />;
 }

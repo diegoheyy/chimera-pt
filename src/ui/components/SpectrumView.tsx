@@ -117,5 +117,5 @@ export function SpectrumView(props: { ring?: boolean }) {
       label(ctx, f0Text, x - 9, bot + 13, { size: LABEL_MIN, color: V.green, align: "right", ls: 0.12 });
     }
   });
-  return <canvas ref={ref} className="instrument-canvas" aria-label="Output spectrum: harmonics, the vocal tract's resonances and its formants" role="img" />;
+  return <canvas ref={ref} className="instrument-canvas" aria-label="Espectro de saída: harmônicos, ressonâncias do trato vocal e formantes" role="img" />;
 }

@@ -8,7 +8,7 @@ import { call } from "./chimera.ts";
 import { CREATURE_VISUALS } from "../ui/creatureVisuals.ts";
 import type {
   ArticKey, ArticSpec, BeatPreset, BodyMix, BeatSound, BeatStep, CreatureDef, CreatureTelemetry, DemoSong, Gesture, HumanArtic, HumanBody,
-  HumanFrame, Lang, Phrase, Plan, Segment, SkippedIpa, SungNote, Syllable, VoiceSource, VowelRef,
+  Dialect, HumanFrame, Lang, Phrase, Plan, Segment, SkippedIpa, SungNote, Syllable, VoiceSource, VowelRef,
 } from "./types.ts";
 
 export type * from "./types.ts";
@@ -82,7 +82,7 @@ export class EnglishG2P {
   }
 
   /** Load the gzipped dictionary ("word\tPHONES" lines). */
-  load(url = "/data/cmudict.txt.gz"): Promise<void> {
+  load(url = `${import.meta.env?.BASE_URL ?? "/"}data/cmudict.txt.gz`): Promise<void> {
     if (this.isLoaded) return Promise.resolve();
     if (this.loading) return this.loading;
     this.loading = fetchGzText(url).then(
@@ -135,7 +135,7 @@ export class MandarinLexicon {
     return this.isLoaded;
   }
 
-  load(url = "/data/mandarin.txt.gz"): Promise<void> {
+  load(url = `${import.meta.env?.BASE_URL ?? "/"}data/mandarin.txt.gz`): Promise<void> {
     if (this.isLoaded) return Promise.resolve();
     if (this.loading) return this.loading;
     this.loading = fetchGzText(url).then(
@@ -167,6 +167,19 @@ export function lyricsToSyllables(text: string, lang: Lang = "en"): Syllable[] {
  */
 export function turkishPhrases(text: string): Phrase[] {
   return call("trPhrases", { text });
+}
+
+/**
+ * Brazilian Portuguese text → phrases of segments, in an accent. Spelling rules and two short word
+ * lists are the G2P (crates/chimera/src/phonetics/portuguese.rs).
+ */
+export function portuguesePhrases(text: string, dialect: Dialect = "paulistano"): Phrase[] {
+  return call("ptPhrases", { text, dialect });
+}
+
+/** Brazilian Portuguese text → its broad IPA, syllables split by dots, ˈ before the stressed one. */
+export function portugueseTranscribe(text: string, dialect: Dialect = "paulistano"): string {
+  return call("ptTranscribe", { text, dialect });
 }
 
 // ------------------------------------------------------------------ planning

@@ -117,7 +117,7 @@ export function DuetPage(props: { id: string }) {
       </div>
     );
   const st = transport?.state ?? { playing: false, time: 0, duration: 0, epoch: 0 };
-  const title = loaded?.show.title ?? "Loading…";
+  const title = loaded?.show.title ?? "Carregando…";
   return (
     <div className="duet">
       <header className="duet-top">
@@ -125,18 +125,18 @@ export function DuetPage(props: { id: string }) {
         <span className="duet-title">{title}</span>
       </header>
       <main className="duet-heads" style={{ "--voices": loaded?.voices.length ?? 2 } as React.CSSProperties}>
-        {loaded && transport ? loaded.voices.map((v, i) => <Head key={i} name={v.name} track={v.track} words={v.words} show={loaded.show} transport={transport} facing={i > 0 && i === loaded.voices.length - 1 ? -1 : 1} />) : <p className="duet-msg">Loading the song…</p>}
+        {loaded && transport ? loaded.voices.map((v, i) => <Head key={i} name={v.name} track={v.track} words={v.words} show={loaded.show} transport={transport} facing={i > 0 && i === loaded.voices.length - 1 ? -1 : 1} />) : <p className="duet-msg">Carregando a música…</p>}
       </main>
       <footer className="duet-bar">
         <button className="primary large" disabled={!loaded} onClick={() => (st.playing ? transport?.pause() : transport?.play())}>
-          {st.playing ? "Pause" : st.duration > 0 && st.time >= st.duration - 0.05 ? "Again" : "Play"}
+          {st.playing ? "Pausar" : st.duration > 0 && st.time >= st.duration - 0.05 ? "De novo" : "Tocar"}
         </button>
         <span className="duet-time">
           {clock(st.time)} / {clock(st.duration)}
         </span>
         <input
           type="range"
-          aria-label="Position in the song"
+          aria-label="Posição na música"
           min={0}
           max={st.duration || 1}
           step={0.1}

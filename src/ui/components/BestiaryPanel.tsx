@@ -64,12 +64,12 @@ function CallActions({ def }: { def: CreatureDef }) {
   };
   const again = sounding ?? (def.calls.find((c) => c.id === last) ?? def.calls[0])?.id;
   return (
-    <ActionBar label="Calls" onSpace={() => again && press(again)}>
+    <ActionBar label="Chamados" onSpace={() => again && press(again)}>
       {def.calls.map((c) => (
         <PrimaryButton key={c.id} className="act-call" label={c.name} playing={sounding === c.id} pressed={last === c.id} title={c.hint} onClick={() => press(c.id)} />
       ))}
-      <Chip on={hold} onClick={() => void toggleBreath()} title="Keep the breath on and shape the sound with the controls">
-        Breathe
+      <Chip on={hold} onClick={() => void toggleBreath()} title="Mantenha o sopro e molde o som com os controles">
+        Respirar
       </Chip>
     </ActionBar>
   );
@@ -81,9 +81,9 @@ function KeysMode({ def }: { def: CreatureDef }) {
   const setKeyCall = useStore((s) => s.setKeyCall);
   return (
     <Menu
-      label="What the keys play"
+      label="O que o teclado toca"
       value={keyCall ?? ""}
-      options={[{ value: "", label: "Held voice" }, ...def.calls.map((c) => ({ value: c.id, label: c.name }))]}
+      options={[{ value: "", label: "Voz sustentada" }, ...def.calls.map((c) => ({ value: c.id, label: c.name }))]}
       onChange={(id) => setKeyCall(id || null)}
     />
   );
@@ -126,19 +126,19 @@ export function BestiaryRight() {
   return (
     <div className="right right-bestiary">
       {def && <CallActions def={def} />}
-      <Screen className="s-gallery" title="Creatures">
+      <Screen className="s-gallery" title="Criaturas">
         <Gallery />
       </Screen>
-      <Screen watch className="s-wf" title="Spectrogram">
+      <Screen watch className="s-wf" title="Espectrograma">
         <Spectrogram />
       </Screen>
-      <Screen className="s-cparams" title="Controls">
+      <Screen className="s-cparams" title="Controles">
         {def && <Params def={def} />}
       </Screen>
-      <Screen watch className="s-airway" title="Airway" sub="Each tube unrolled">
+      <Screen watch className="s-airway" title="Via aérea" sub="Cada tubo desenrolado">
         <CreatureTubes />
       </Screen>
-      <Screen className="s-keys s-keys-compact" title="Keys" tools={<>{def && <KeysMode def={def} />}<MidiButton /></>}>
+      <Screen className="s-keys s-keys-compact" title="Teclado" tools={<>{def && <KeysMode def={def} />}<MidiButton /></>}>
         <Keys />
       </Screen>
     </div>

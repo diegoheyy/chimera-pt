@@ -22,52 +22,52 @@ export function VoiceControls() {
   const setArtic = useStore((st) => st.setArtic);
   const pages: EncoderPage[] = [
     {
-      name: "Voice",
+      name: "Voz",
       encoders: [
-        { label: "Pitch", value: s.f0, min: 40, max: 1100, log: true, onChange: (v) => setSource({ f0: v }), format: (v) => ({ value: v.toFixed(0), unit: `Hz ${noteName(v)}` }) },
-        { label: "Breath", value: s.pressure, min: 2, max: 22, onChange: (v) => setSource({ pressure: v }), format: (v) => ({ value: v.toFixed(1), unit: "cmH₂O" }) },
-        { label: "Pressed", value: s.tension, min: 0, max: 1, onChange: (v) => setSource({ tension: v }), format: pct },
+        { label: "Altura", value: s.f0, min: 40, max: 1100, log: true, onChange: (v) => setSource({ f0: v }), format: (v) => ({ value: v.toFixed(0), unit: `Hz ${noteName(v)}` }) },
+        { label: "Pressão subglótica", value: s.pressure, min: 2, max: 22, onChange: (v) => setSource({ pressure: v }), format: (v) => ({ value: v.toFixed(1), unit: "cmH₂O" }) },
+        { label: "Pressão glótica", value: s.tension, min: 0, max: 1, onChange: (v) => setSource({ tension: v }), format: pct },
         { label: "Vibrato", value: s.vibratoDepth, min: 0, max: 120, onChange: (v) => setSource({ vibratoDepth: v }), format: (v) => ({ value: v.toFixed(0), unit: "cents" }) },
       ],
     },
     {
-      name: "Tone",
+      name: "Timbre",
       encoders: [
-        { label: "Bright", value: s.brightness, min: 0, max: 1, onChange: (v) => setSource({ brightness: v }), format: pct },
-        { label: "Breathy", value: s.breathiness, min: 0, max: 1, onChange: (v) => setSource({ breathiness: v }), format: pct },
-        { label: "Rough", value: s.roughness, min: 0, max: 1, onChange: (v) => setSource({ roughness: v }), format: pct },
-        { label: "Fry", value: s.fry, min: 0, max: 1, onChange: (v) => setSource({ fry: v }), format: pct },
+        { label: "Brilho", value: s.brightness, min: 0, max: 1, onChange: (v) => setSource({ brightness: v }), format: pct },
+        { label: "Soprosidade", value: s.breathiness, min: 0, max: 1, onChange: (v) => setSource({ breathiness: v }), format: pct },
+        { label: "Rugosidade", value: s.roughness, min: 0, max: 1, onChange: (v) => setSource({ roughness: v }), format: pct },
+        { label: "Vocal fry", value: s.fry, min: 0, max: 1, onChange: (v) => setSource({ fry: v }), format: pct },
       ],
     },
     {
-      name: "Pitch",
-      encoders: [{ label: "Glide", value: s.glide, min: 0.005, max: 0.6, log: true, onChange: (v) => setSource({ glide: v }), format: (v) => ({ value: (v * 1000).toFixed(0), unit: "ms" }) }],
+      name: "Altura",
+      encoders: [{ label: "Glissando", value: s.glide, min: 0.005, max: 0.6, log: true, onChange: (v) => setSource({ glide: v }), format: (v) => ({ value: (v * 1000).toFixed(0), unit: "ms" }) }],
     },
     {
-      name: "Mouth",
+      name: "Boca",
       encoders: [
-        { label: "Rounding", value: 1 - a.lipWidth, min: 0, max: 1, onChange: (v) => setArtic({ lipWidth: 1 - v }), format: pct },
-        { label: "Lips open", value: a.lipAp, min: -0.3, max: 2.2, onChange: (v) => setArtic({ lipAp: v }), format: cm },
-        { label: "Protrude", value: a.lipProt, min: -0.1, max: 1.4, onChange: (v) => setArtic({ lipProt: v }), format: cm },
-        { label: "Jaw", value: a.jaw, min: 0, max: 2.4, onChange: (v) => setArtic({ jaw: v }), format: cm },
+        { label: "Arredondamento", value: 1 - a.lipWidth, min: 0, max: 1, onChange: (v) => setArtic({ lipWidth: 1 - v }), format: pct },
+        { label: "Abertura labial", value: a.lipAp, min: -0.3, max: 2.2, onChange: (v) => setArtic({ lipAp: v }), format: cm },
+        { label: "Protrusão", value: a.lipProt, min: -0.1, max: 1.4, onChange: (v) => setArtic({ lipProt: v }), format: cm },
+        { label: "Mandíbula", value: a.jaw, min: 0, max: 2.4, onChange: (v) => setArtic({ jaw: v }), format: cm },
       ],
     },
     {
-      name: "Tongue",
+      name: "Língua",
       encoders: [
-        { label: "Root", value: a.root, min: -0.9, max: 0.9, onChange: (v) => setArtic({ root: v }), format: signedCm },
-        { label: "Tip curl", value: a.ttCurl, min: 0, max: 1, onChange: (v) => setArtic({ ttCurl: v }), format: pct },
+        { label: "Raiz", value: a.root, min: -0.9, max: 0.9, onChange: (v) => setArtic({ root: v }), format: signedCm },
+        { label: "Ponta curvada", value: a.ttCurl, min: 0, max: 1, onChange: (v) => setArtic({ ttCurl: v }), format: pct },
       ],
     },
     {
-      name: "Throat",
+      name: "Garganta",
       encoders: [
-        { label: "Soft palate", value: a.velum, min: -0.25, max: 1.2, onChange: (v) => setArtic({ velum: v }), format: (v) => (v <= 0 ? { value: "Shut", unit: "" } : { value: v.toFixed(2), unit: "cm²" }) },
-        { label: "Larynx", value: a.larynx, min: -1.5, max: 1.5, onChange: (v) => setArtic({ larynx: v }), format: signedCm },
+        { label: "Véu palatino", value: a.velum, min: -0.25, max: 1.2, onChange: (v) => setArtic({ velum: v }), format: (v) => (v <= 0 ? { value: "Fechado", unit: "" } : { value: v.toFixed(2), unit: "cm²" }) },
+        { label: "Laringe", value: a.larynx, min: -1.5, max: 1.5, onChange: (v) => setArtic({ larynx: v }), format: signedCm },
         { label: "Twang", value: a.epilarynx, min: 0, max: 1, onChange: (v) => setArtic({ epilarynx: v }), format: pct },
-        { label: "False folds", value: a.ventricular, min: 0, max: 1, onChange: (v) => setArtic({ ventricular: v }), format: pct },
+        { label: "Pregas vestibulares", value: a.ventricular, min: 0, max: 1, onChange: (v) => setArtic({ ventricular: v }), format: pct },
       ],
     },
   ];
-  return <EncoderPages label="Voice" pages={pages} />;
+  return <EncoderPages label="Voz" pages={pages} />;
 }

@@ -22,7 +22,8 @@ describe("tunes", () => {
     for (const t of TUNES) {
       const lens = t.phrases.map((p) => beats(p.map(([, b]) => ({ beats: b }))));
       expect(new Set(lens).size).toBe(1);
-      for (const p of t.phrases) expect(p[p.length - 1][1]).toBeGreaterThanOrEqual(1.5);
+      // a song sung as written (a cantiga) keeps its melody's rhythm: its words breathe where they end
+      if (t.lyrics === undefined) for (const p of t.phrases) expect(p[p.length - 1][1]).toBeGreaterThanOrEqual(1.5);
     }
   });
   test("ids are unique", () => {

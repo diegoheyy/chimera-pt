@@ -22,8 +22,8 @@ export type OverlayFn = (ctx: CanvasRenderingContext2D, r: FaceView, m: VoiceMod
 
 /** the tract's length and mouth opening, then the live pitch and lungs */
 export const tractInfo: InfoFn = (_m, f, tele) => {
-  const info = [`Tract ${f.length.toFixed(1)} cm`, `Mouth ${f.lipArea.toFixed(1)} cm²`];
-  if (tele) info.push(`F0 ${tele.t.f0.toFixed(1)} Hz`, `Lungs ${tele.t.pLung.toFixed(1)} cmH₂O`);
+  const info = [`Trato ${f.length.toFixed(1)} cm`, `Boca ${f.lipArea.toFixed(1)} cm²`];
+  if (tele) info.push(`F0 ${tele.t.f0.toFixed(1)} Hz`, `Pulmões ${tele.t.pLung.toFixed(1)} cmH₂O`);
   return info;
 };
 
@@ -42,10 +42,10 @@ export function nearestVowel(m: VoiceModel, F1: number, F2: number): string {
 
 /** Play mode: the tongue as its nearest vowel, then jaw, lips and soft palate */
 export const articulatorSlots: SlotsFn = (m, a, f, formants) => [
-  formants.length >= 2 ? { label: "Tongue", value: nearestVowel(m, formants[0], formants[1]), color: V.green, ipa: true } : { label: "Tongue", value: "-", color: V.green },
-  { label: "Jaw", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
-  { label: "Lips", value: a.lipAp.toFixed(1), unit: "cm", color: V.pink },
-  f.velumPort > 0.02 ? { label: "Soft palate", value: f.velumPort.toFixed(2), unit: "cm²", color: V.white } : { label: "Soft palate", value: "Shut", color: V.white },
+  formants.length >= 2 ? { label: "Língua", value: nearestVowel(m, formants[0], formants[1]), color: V.green, ipa: true } : { label: "Língua", value: "-", color: V.green },
+  { label: "Mandíbula", value: a.jaw.toFixed(1), unit: "cm", color: V.red },
+  { label: "Lábios", value: a.lipAp.toFixed(1), unit: "cm", color: V.pink },
+  f.velumPort > 0.02 ? { label: "Véu palatino", value: f.velumPort.toFixed(2), unit: "cm²", color: V.white } : { label: "Véu palatino", value: "Fechado", color: V.white },
 ];
 
 export function AnatomyView(props: { slots?: SlotsFn; info?: InfoFn; showFormants?: boolean; overlay?: OverlayFn }) {
@@ -228,7 +228,7 @@ export function AnatomyView(props: { slots?: SlotsFn; info?: InfoFn; showFormant
         onPointerUp={onUp}
         onPointerCancel={onUp}
         onDoubleClick={onDouble}
-        aria-label="Vocal tract cross-section. Drag the tongue, tongue tip, jaw, lips, soft palate or larynx handles."
+        aria-label="Corte sagital do trato vocal. Arraste as alças da língua, ponta da língua, mandíbula, lábios, véu palatino ou laringe."
         role="img"
       />
     </div>

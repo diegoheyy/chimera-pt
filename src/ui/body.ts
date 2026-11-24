@@ -13,7 +13,7 @@ export const PRESETS: Record<BodyName, BodyMix> = {
   child: { female: 0, child: 1 },
 };
 
-export const PRESET_LABEL: Record<BodyName, string> = { male: "Adult male", female: "Adult female", child: "Child" };
+export const PRESET_LABEL: Record<BodyName, string> = { male: "Homem adulto", female: "Mulher adulta", child: "Criança" };
 
 const clamp01 = (x: number) => (Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0);
 
@@ -59,6 +59,6 @@ export function bodyLabel(b: BodyMix): string {
   if (p) return PRESET_LABEL[p];
   const parts = bodyWeights(b)
     .filter(([, w]) => w > 0.005)
-    .map(([n, w]) => `${n[0].toUpperCase()}${n.slice(1)} ${Math.round(w * 100)}`);
+    .map(([n, w]) => `${({ male: "Homem", female: "Mulher", child: "Criança" } as Record<string, string>)[n] ?? n} ${Math.round(w * 100)}`);
   return `${parts.join(" · ")} %`;
 }

@@ -92,5 +92,5 @@ export function Stroboscope() {
       labelBlock(ctx, "MAKE A SOUND TO SEE THEM VIBRATE", tx0, (yA0 + yA1) / 2, tx1 - tx0, { size: LABEL_MIN, color: TEXT.secondary, ls: 0.16 });
     }
   });
-  return <canvas ref={ref} className="instrument-canvas" aria-label="Vocal folds seen from above, replayed slowly, with the glottal area and flow" role="img" />;
+  return <canvas ref={ref} className="instrument-canvas" aria-label="Pregas vocais vistas de cima, em câmera lenta, com a área e o fluxo glóticos" role="img" />;
 }

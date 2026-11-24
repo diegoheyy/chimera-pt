@@ -5,7 +5,7 @@
 import { create } from "zustand";
 import { inPlugin } from "../audio/pluginBridge.ts";
 import type { BodyMix } from "../wasm/types.ts";
-import { EnglishG2P, MandarinLexicon, turkishPhrases, type Lang, type Phrase } from "../wasm/engine.ts";
+import { EnglishG2P, MandarinLexicon, portuguesePhrases, portugueseTranscribe, turkishPhrases, type Dialect, type Lang, type Phrase } from "../wasm/engine.ts";
 import { tokenizeIpa } from "../wasm/engine.ts";
 import { planPhrases, type Plan, type Segment } from "../wasm/engine.ts";
 import { engine } from "../audio/AudioEngine.ts";
@@ -83,20 +83,29 @@ export function transcribe(phrases: { segments: Segment[]; intonation?: string }
   return phrases.map((p) => p.segments.map((s) => (s.stress === 1 ? "ˈ" : s.stress === 2 ? "ˌ" : "") + s.ipa + (s.wordEnd ? " " : "")).join("").trim() + (p.intonation === "question" ? "?" : "")).join(" | ");
 }
 
-export function speakPhrases(phrases: { segments: Segment[]; intonation?: "statement" | "question" | "flat"; pause?: number; words?: string[] }[], o: { body: BodyMix; rate: number; f0: number }): SpokenPlan {
-  const plan = planPhrases(phrases, { body: o.body, t0: 0, rate: o.rate, f0: o.f0 });
+export function speakPhrases(phrases: { segments: Segment[]; intonation?: "statement" | "question" | "flat"; pause?: number; words?: string[] }[], o: { body: BodyMix; rate: number; f0: number; transcription?: string; accent?: number }): SpokenPlan {
+  const plan = planPhrases(phrases, { body: o.body, t0: 0, rate: o.rate, f0: o.f0, accent: o.accent });
   const id = engine.schedule({ gestures: plan.gestures.map((g: Gesture) => ({ ...g, targets: { ...g.targets } })), segments: plan.segments, end: plan.end });
-  current = { plan, offset: null, id, transcription: transcribe(phrases), words: wordSpans(phrases, plan) };
+  current = { plan, offset: null, id, transcription: o.transcription ?? transcribe(phrases), words: wordSpans(phrases, plan) };
   for (const l of listeners) l(current);
   return current;
 }
 
-/** Say text: IPA, or words read as `lang` (English unless said). */
-export async function speakText(text: string, o: { ipa: boolean; lang?: Lang; body: BodyMix; rate: number; f0: number }): Promise<SpokenPlan | null> {
+/** Portuguese speech's pitch-accent size (the planner's `accent`, a fraction of the pitch) */
+export const PT_ACCENT = 0.22;
+
+/** Say text: IPA, or words read as `lang` (English unless said; Portuguese in `dialect`). */
+export async function speakText(text: string, o: { ipa: boolean; lang?: Lang; dialect?: Dialect; body: BodyMix; rate: number; f0: number }): Promise<SpokenPlan | null> {
   if (!text.trim()) return null;
   let phrases: Phrase[];
   if (o.ipa) phrases = ipaToPhrases(text);
   else if (o.lang === "tr") phrases = turkishPhrases(text);
+  else if (o.lang === "pt") {
+    phrases = portuguesePhrases(text, o.dialect);
+    // Portuguese shows its syllables and stress, as a speech therapist writes them
+    // and a livelier tune than the planner's default (0.14): chosen by ear over the flatter one
+    if (phrases.length) return speakPhrases(phrases, { ...o, transcription: portugueseTranscribe(text, o.dialect), accent: PT_ACCENT });
+  }
   else {
     try {
       await g2p.load();

@@ -194,7 +194,7 @@ export function CreatureView() {
     label(ctx, fit(ctx, def.name.toUpperCase(), w - 32, compact ? 18 : 24, 0.18), 16, compact ? 30 : 34, { size: compact ? 18 : 24, color: TEXT.primary, ls: 0.18 });
     label(ctx, fit(ctx, def.latin.toUpperCase(), w - 34, 10, 0.16), 18, compact ? 48 : 54, { size: LABEL_MIN, color: TEXT.secondary, ls: 0.16 });
     blurb.forEach((line, i) => label(ctx, line, 18, blurbY + i * 15, blurbO));
-    const state = live ? (live.call ? (def.calls.find((c) => c.id === live.call)?.name ?? live.call) : live.gate > 0.05 ? "Sustaining" : "At rest") : "Not started";
+    const state = live ? (live.call ? (def.calls.find((c) => c.id === live.call)?.name ?? live.call) : live.gate > 0.05 ? "Sustentando" : "Em repouso") : "Não iniciado";
     const pitchText = pp ? (() => { const f = fmtParam(pitch, pp); return `${f.value} ${f.unit}`.trim().toUpperCase(); })() : "";
     if (compact) {
       label(ctx, `${state.toUpperCase()}${pitchText ? "   " + pitchText : ""}`, 18, 70, { size: 11, color: V.amber, ls: 0.14 });
@@ -233,5 +233,5 @@ export function CreatureView() {
       else if (f.unit) label(ctx, f.unit.toUpperCase(), cx, cy + 32 + big, { size: LABEL_MIN, color, ls: 0.14 });
     });
   });
-  return <canvas ref={ref} className="creature-canvas" aria-label="Creature airway: its outline, its airways lit by sound pressure, and its sound sources" role="img" />;
+  return <canvas ref={ref} className="creature-canvas" aria-label="Via aérea da criatura: contorno, vias iluminadas pela pressão sonora e fontes sonoras" role="img" />;
 }

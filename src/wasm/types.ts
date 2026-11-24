@@ -201,7 +201,11 @@ export interface Plan {
 
 /** The language Latin-script words are read in: their script can't tell Turkish from English, so
  *  the player chooses (Rust's `syllables::Lang`). Hangul and Cyrillic go to their own front ends. */
-export type Lang = "en" | "tr";
+export type Lang = "en" | "tr" | "pt";
+
+/** A Brazilian accent for Portuguese (Rust's `portuguese::Dialect`): whether t/d palatalize, how s and
+ *  r close a syllable, how strong r sounds, whether a final e rises to [i]. */
+export type Dialect = "paulistano" | "carioca" | "nordestino" | "caipira" | "gaucho";
 
 export interface Phrase {
   segments: Segment[];

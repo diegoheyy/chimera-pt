@@ -35,12 +35,12 @@ export function faceHandles(model: VoiceModel, f: HumanFrame, a: HumanArtic): Ha
   const J = jawFn(model, a);
   const lips = { x: (f.upperLip[6].x + f.lowerLip[6].x) / 2 + 0.15, y: (f.upperLip[6].y + f.lowerLip[6].y) / 2 };
   return [
-    { id: "tongue", pos: f.tongueCenter, label: "Tongue body" },
-    { id: "tip", pos: f.tip, label: "Tongue tip" },
-    { id: "jaw", pos: J(7.5, 4.9), label: "Jaw" },
-    { id: "lips", pos: lips, label: "Lips" },
-    { id: "velum", pos: f.velum[Math.floor(f.velum.length / 2)], label: "Soft palate" },
-    { id: "larynx", pos: { x: f.glottis.x + 1.2 * t.scale, y: f.glottis.y }, label: "Larynx" },
+    { id: "tongue", pos: f.tongueCenter, label: "Dorso da língua" },
+    { id: "tip", pos: f.tip, label: "Ponta da língua" },
+    { id: "jaw", pos: J(7.5, 4.9), label: "Mandíbula" },
+    { id: "lips", pos: lips, label: "Lábios" },
+    { id: "velum", pos: f.velum[Math.floor(f.velum.length / 2)], label: "Véu palatino" },
+    { id: "larynx", pos: { x: f.glottis.x + 1.2 * t.scale, y: f.glottis.y }, label: "Laringe" },
   ];
 }
 
